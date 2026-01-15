@@ -101,7 +101,7 @@ export default function WelcomeScreen() {
       {/* Header */}
       <View style={[styles.headerBar, styles.headerBarSticky, isDark && styles.headerBarDark]}>
         <View style={styles.headerLeft}>
-          <MaterialIcons name="dashboard" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <MaterialIcons name="person" size={20} color="#fff" style={{ marginRight: 8 }} />
           <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Parent Dashboard</Text>
         </View>
 
@@ -707,9 +707,10 @@ const styles = StyleSheet.create<any>({
     shadowRadius: 12,
   },
   tab: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 18,
-    borderRadius: 999,
+    borderRadius: 12,
+    minWidth: 110,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -731,7 +732,8 @@ const styles = StyleSheet.create<any>({
   tabGradient: {
     paddingVertical: 12,
     paddingHorizontal: 22,
-    borderRadius: 999,
+    borderRadius: 12,
+    minWidth: 110,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },

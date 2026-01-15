@@ -141,7 +141,7 @@ export default function ParentDashboardScreen() {
 
       <View style={[styles.headerBar, styles.headerBarSticky]}>
         <View style={styles.headerLeft}>
-          <MaterialIcons name="dashboard" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <MaterialIcons name="person" size={20} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
         </View>
 
@@ -208,7 +208,6 @@ export default function ParentDashboardScreen() {
                   <View key={i} style={[styles.completedCard, { marginTop: 12, backgroundColor: bg, borderColor: col.accent }]}> 
                     <Text style={[styles.completedTitle, { color: textColor }]}>{c.title}</Text>
                     <Text style={[styles.completedMeta, { color: textColor, marginTop: 8 }]}>{c.subject}</Text>
-                    <Text style={[styles.completedDate, { color: textColor }]}>{c.submitted}</Text>
                   </View>
                 );
               })}
