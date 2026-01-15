@@ -10,10 +10,11 @@
     "web": "expo start --web",
     "copy-fonts": "node ./scripts/copy-vector-fonts.js",
     "build": "npm run vercel-build",
-    "vercel-build": "npm run export:web",
+    "vercel-build": "npm run export:web && npm run force-mobile",
     "export:web": "npm run copy-fonts && expo export --platform web && npm run publish-fonts && npm run fix-dist",
     "publish-fonts": "node ./scripts/publish-fonts-to-dist.js",
     "fix-dist": "node ./scripts/fix-dist-asset-paths.js",
+    "force-mobile": "node ./scripts/fix-dist-mobile.js",
     "lint": "expo lint"
   },
   "dependencies": {

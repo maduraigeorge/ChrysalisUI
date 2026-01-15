@@ -55,21 +55,14 @@ Join our community of developers creating universal apps.
 Setting	Value
 Framework Preset	(Other)
 Install Command	(npm install)
-Build Command	(npx expo export --platform web)
+Build Command	(npm run vercel-build)
 Output Directory	(dist)
 
-## Host to vercel as web
+Force mobile rendering	This project injects a mobile viewport into every exported HTML file during the build. By default it forces a narrow mobile width (375px). To enable "scale-to-fit" mode (scales the mobile layout to fill desktop browsers), set the environment variable `FORCE_MOBILE_MODE=scale` in Vercel. You can customize the mobile width with `FORCE_MOBILE_WIDTH` (e.g. `414`). The script runs automatically as part of `npm run vercel-build`.
+
+## Host as web locally and find the folder dist
 Use npx expo export --platform web
 
-## after exporting it as Dist/html.
-
-Add vercel.json
-
-{
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}
 
 ## Push to Github
 git add .
