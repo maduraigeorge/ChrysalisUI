@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "export:web": "expo export --platform web && npm run fix-dist",
+    "vercel-build": "npm run export:web",
     "fix-dist": "node ./scripts/fix-dist-asset-paths.js",
     "lint": "expo lint"
   },
