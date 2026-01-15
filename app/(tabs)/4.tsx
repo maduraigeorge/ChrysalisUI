@@ -5,12 +5,21 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ParentDashboardScreen() {
+  React.useEffect(() => {
+    if (Platform.OS === 'android' && (UIManager as any)?.setLayoutAnimationEnabledExperimental) {
+      (UIManager as any).setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* BLOBS */}
@@ -86,26 +95,46 @@ export default function ParentDashboardScreen() {
 /* ───────── COMPONENTS ───────── */
 
 function SubjectCard({ color, icon, title, meta, badge, children }: any) {
+  const [expanded, setExpanded] = React.useState(true);
+
+  const toggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(v => !v);
+  };
+
   return (
     <View style={styles.subjectCard}>
       <View style={subjectLeftStripe(color)} />
       <View style={styles.subjectContent}>
-        <View style={styles.subjectHeaderRow}>
-          <View style={styles.subjectIconBox}>
-            <MaterialIcons name={icon} size={20} color={color} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.subjectTitle}>{title}</Text>
-            <Text style={styles.subjectMeta}>{meta}</Text>
-          </View>
-          {badge && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{badge}</Text>
+        <TouchableOpacity
+          onPress={toggle}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={`${title} section`}
+        >
+          <View style={styles.subjectHeaderRow}>
+            <View style={styles.subjectIconBox}>
+              <MaterialIcons name={icon} size={20} color={color} />
             </View>
-          )}
-        </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.subjectTitle}>{title}</Text>
+              <Text style={styles.subjectMeta}>{meta}</Text>
+            </View>
+            {badge && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{badge}</Text>
+              </View>
+            )}
+            <MaterialIcons
+              name={expanded ? 'expand-less' : 'expand-more'}
+              size={22}
+              color="#64748B"
+              style={styles.expandIcon}
+            />
+          </View>
+        </TouchableOpacity>
 
-        {children}
+        {expanded && <View>{children}</View>}
       </View>
     </View>
   );
@@ -267,6 +296,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '700',
+  },
+
+  expandIcon: {
+    marginLeft: 8,
   },
 
   /* ACTIVITY ROW */
