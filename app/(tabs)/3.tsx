@@ -116,21 +116,45 @@ export default function WelcomeScreen() {
         </View>
       </View>
 
-      {/* Tabs */}
-      <View style={styles.tabsWrap}>
-        <TouchableOpacity onPress={() => setActiveTab('Activities')} style={[styles.tab, activeTab === 'Activities' && styles.tabActive]}>
-          <View style={styles.tabContent}>
-            <Ionicons name="list-outline" size={16} color={activeTab === 'Activities' ? '#fff' : '#6b7280'} style={{ marginRight: 8 }} />
-            <Text style={[styles.tabText, activeTab === 'Activities' && styles.tabTextActive]}>Activities</Text>
-          </View>
-        </TouchableOpacity>
+      {/* FOOTER TABS (fixed at bottom - from 4.tsx) */}
+      <View style={styles.footerContainer} pointerEvents="box-none">
+        <View style={styles.tabsWrap} pointerEvents="box-none">
+          <TouchableOpacity onPress={() => setActiveTab('Activities')}>
+            {activeTab === 'Activities' ? (
+              <LinearGradient colors={["#8B5CF6", "#5D5FEF"]} style={styles.tabGradient}>
+                <View style={styles.tabContent}>
+                  <Ionicons name="list-outline" size={18} color="#fff" style={{ marginRight: 10 }} />
+                  <Text style={styles.tabTextActive}>Activities</Text>
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={[styles.tab, { borderColor: '#8B5CF6' }]}>
+                <View style={styles.tabContent}>
+                  <Ionicons name="list-outline" size={18} color="#6b7280" style={{ marginRight: 10 }} />
+                  <Text style={styles.tabText}>Activities</Text>
+                </View>
+              </View>
+            )}
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setActiveTab('Insights')} style={[styles.tab, activeTab === 'Insights' && styles.tabActive]}>
-          <View style={styles.tabContent}>
-            <Ionicons name="bar-chart-outline" size={16} color={activeTab === 'Insights' ? '#fff' : '#6b7280'} style={{ marginRight: 8 }} />
-            <Text style={[styles.tabText, activeTab === 'Insights' && styles.tabTextActive]}>Insights</Text>
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('Insights')}>
+            {activeTab === 'Insights' ? (
+              <LinearGradient colors={["#8B5CF6", "#5D5FEF"]} style={styles.tabGradient}>
+                <View style={styles.tabContent}>
+                  <Ionicons name="bar-chart-outline" size={18} color="#fff" style={{ marginRight: 10 }} />
+                  <Text style={styles.tabTextActive}>Insights</Text>
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={[styles.tab, { borderColor: '#8B5CF6' }]}>
+                <View style={styles.tabContent}>
+                  <Ionicons name="bar-chart-outline" size={18} color="#6b7280" style={{ marginRight: 10 }} />
+                  <Text style={styles.tabText}>Insights</Text>
+                </View>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.card}>
@@ -666,10 +690,7 @@ const styles = StyleSheet.create<any>({
   },
 
   tabsWrap: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 18 : 12,
-    left: 12,
-    right: 12,
+    position: 'relative',
     zIndex: 70,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -689,6 +710,9 @@ const styles = StyleSheet.create<any>({
     paddingVertical: 8,
     paddingHorizontal: 18,
     borderRadius: 999,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e6e6f0',
@@ -703,6 +727,25 @@ const styles = StyleSheet.create<any>({
   },
   tabTextActive: {
     color: '#fff',
+  },
+  tabGradient: {
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    borderRadius: 999,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+  },
+  footerContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    zIndex: 999,
+    paddingBottom: Platform.OS === 'ios' ? 12 : 8,
   },
 
   insightsPlaceholder: {
@@ -754,4 +797,5 @@ const styles = StyleSheet.create<any>({
     color: '#94a3b8',
     fontSize: 13,
     marginTop: 6,
-  },});
+  }
+});
