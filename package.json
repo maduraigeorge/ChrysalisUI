@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "copy-fonts": "node ./scripts/copy-vector-fonts.js",
     "build": "npm run export:web",
-    "export:web": "npm run copy-fonts && expo export --platform web && npm run fix-dist",
+    "export:web": "npm run copy-fonts && expo export --platform web && npm run publish-fonts && npm run fix-dist",
+    "publish-fonts": "node ./scripts/publish-fonts-to-dist.js",
     "fix-dist": "node ./scripts/fix-dist-asset-paths.js",
     "lint": "expo lint"
   },
