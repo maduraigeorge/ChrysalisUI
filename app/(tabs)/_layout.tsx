@@ -13,14 +13,17 @@ export default function TabLayout() {
     <Tabs
       // Let the file-system router generate tabs under this folder dynamically.
       // Tab labels are set from the filename via the route name.
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarLabel: route.name,
-        tabBarActiveTintColor: '#0f172a',
-        tabBarInactiveTintColor: '#374151',
-        tabBarStyle: { backgroundColor: tabBarBackground, borderTopWidth: 0, elevation: 0, shadowOpacity: 0 },
-        tabBarButton: HapticTab,
-      })}
+      screenOptions={({ route }) => {
+        const isHidden = route?.name?.startsWith?.('_');
+        return ({
+          headerShown: false,
+          tabBarLabel: isHidden ? undefined : route.name,
+          tabBarActiveTintColor: '#0f172a',
+          tabBarInactiveTintColor: '#374151',
+          tabBarStyle: { backgroundColor: tabBarBackground, borderTopWidth: 0, elevation: 0, shadowOpacity: 0 },
+          tabBarButton: isHidden ? () => null : HapticTab,
+        });
+      }}
     />
   );
 }

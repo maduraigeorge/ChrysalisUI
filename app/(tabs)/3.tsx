@@ -49,8 +49,6 @@ export default function WelcomeScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  const [openSubjects, setOpenSubjects] = useState<Record<string, boolean>>({ Mathematics: true, 'Environmental Studies': false, Social: false, Science: false, English: false });
-  const [activeTab, setActiveTab] = useState<'Activities' | 'Insights'>('Activities');
   const subjects = [
     { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24' }, { title: 'ACTIVITY 1.17' }] },
     { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3' }] },
@@ -59,13 +57,34 @@ export default function WelcomeScreen() {
     { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5' }] },
   ];
 
+  const subjectColors: Record<string, any> = {
+    Mathematics: { accent: '#FAF3A3', lightBg: '#FFFAE6', header: '#FAF3A3' },
+    'Environmental Studies': { accent: '#C7E0F8', lightBg: '#F3F9FF', header: '#C7E0F8' },
+    Social: { accent: '#F6D397', lightBg: '#FFF8EE', header: '#F6D397' },
+    Science: { accent: '#C6E2C1', lightBg: '#F3FBF5', header: '#C6E2C1' },
+    English: { accent: '#CAADCE', lightBg: '#F6EFF6', header: '#CAADCE' },
+    Pink: { accent: '#F19CA4', lightBg: '#FFF0F2', header: '#F19CA4' },
+    Coral: { accent: '#FC3654', lightBg: '#FFF1F3', header: '#FC3654' },
+  };
+
+  const [openSubjects, setOpenSubjects] = useState<Record<string, boolean>>({ [subjects[0].key]: true });
+  const [activeTab, setActiveTab] = useState<'Activities' | 'Insights'>('Activities');
+
   const completed = [
     { title: 'Look Around 1.2', subject: 'Mathematics', submitted: 'Submitted 23/12/2025' },
     { title: 'Look Beyond 1.3', subject: 'Environmental Studies', submitted: 'Submitted 21/12/2025' },
   ];
 
   function toggleSubject(key: string) {
-    setOpenSubjects(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenSubjects(prev => {
+      const isOpen = !!prev[key];
+      if (isOpen) {
+        // close it
+        return { ...prev, [key]: false };
+      }
+      // open only this one, close others
+      return { [key]: true } as Record<string, boolean>;
+    });
   }
 
   return (
@@ -126,11 +145,11 @@ export default function WelcomeScreen() {
 
               {subjects.map(sub => {
                 const colors: Record<string, any> = {
-              Mathematics: { bg: '#F0DFF0', headerBg: '#A875A8', lightBg: '#F8EEF8', lightOverlay: 'rgba(230,168,214,0.45)', accent: '#e6a8d6', icon: 'calculate' },
-              'Environmental Studies': { bg: '#E9E4F6', headerBg: '#B89FE0', lightBg: '#F4F1FA', lightOverlay: 'rgba(207,174,223,0.45)', accent: '#cfadef', icon: 'eco' },
-              Social: { bg: '#E9F6FF', headerBg: '#9FD0FF', lightBg: '#F2FBFF', lightOverlay: 'rgba(207,232,255,0.45)', accent: '#cfefff', icon: 'people' },
-              Science: { bg: '#E9F6EA', headerBg: '#9FDAB0', lightBg: '#F6FBF6', lightOverlay: 'rgba(223,243,216,0.45)', accent: '#dff3d8', icon: 'science' },
-              English: { bg: '#FFFCE0', headerBg: '#E7E05F', lightBg: '#FFFEEC', lightOverlay: 'rgba(248,246,182,0.45)', accent: '#f8f6b6', icon: 'menu-book' },
+              Mathematics: { bg: subjectColors.Mathematics.lightBg, headerBg: subjectColors.Mathematics.header, lightBg: subjectColors.Mathematics.lightBg, lightOverlay: 'rgba(23,43,62,0.08)', accent: subjectColors.Mathematics.accent, icon: 'calculate' },
+              'Environmental Studies': { bg: subjectColors['Environmental Studies'].lightBg, headerBg: subjectColors['Environmental Studies'].header, lightBg: subjectColors['Environmental Studies'].lightBg, lightOverlay: 'rgba(23,43,62,0.08)', accent: subjectColors['Environmental Studies'].accent, icon: 'eco' },
+              Social: { bg: subjectColors.Social.lightBg, headerBg: subjectColors.Social.header, lightBg: subjectColors.Social.lightBg, lightOverlay: 'rgba(23,43,62,0.08)', accent: subjectColors.Social.accent, icon: 'people' },
+              Science: { bg: subjectColors.Science.lightBg, headerBg: subjectColors.Science.header, lightBg: subjectColors.Science.lightBg, lightOverlay: 'rgba(23,43,62,0.08)', accent: subjectColors.Science.accent, icon: 'science' },
+              English: { bg: subjectColors.English.lightBg, headerBg: subjectColors.English.header, lightBg: subjectColors.English.lightBg, lightOverlay: 'rgba(23,43,62,0.08)', accent: subjectColors.English.accent, icon: 'menu-book' },
             };
             const col = colors[sub.key] || { bg: '#fff', headerBg: '#fff', lightBg: '#fff', lightOverlay: 'rgba(148,163,184,0.45)', accent: '#94A3B8', icon: 'folder' };
             const isOpen = !!openSubjects[sub.key];
@@ -147,49 +166,60 @@ export default function WelcomeScreen() {
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={18} color="#fff" style={{ marginRight: 8 }} />
-                          <Text style={styles.counterPlain}>{sub.count}</Text>
+                          <Text style={[styles.counterPlain, { marginRight: 8 }]}>{sub.count}</Text>
+                          <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={18} color="#0f172a" />
                         </View>
                       </View>
                     </TouchableOpacity>
 
                     {isOpen && (
-                      <View style={[styles.activitiesList, { backgroundColor: col.lightOverlay || col.lightBg || col.bg, padding: 10, borderRadius: 12, marginTop: 8 }]}>
+                      <View style={[styles.activitiesList, { backgroundColor: 'transparent', padding: 4, borderRadius: 0, marginTop: 4 }]}>
                         {sub.activities.map((a, i) => (
                             <View key={i} style={[styles.activityItem, i < sub.activities.length - 1 && styles.activityDivider, { borderWidth: 1, borderColor: col.accent, borderRadius: 8, backgroundColor: '#fff', paddingVertical: 10, paddingHorizontal: 10 }]}>
-                              <Text style={styles.activityTitle}>{a.title}</Text>
+                              <View style={{ flex: 1 }}>
+                                <Text style={styles.activityTitle}>{a.title}</Text>
+                                <Text style={styles.dueText}>Due Date: TBD</Text>
+                              </View>
+
                               <View style={{ alignItems: 'center' }}>
                                 <Ionicons name="camera" size={20} color="#000" />
+                              </View>
                             </View>
-                          </View>
-                        ))}
+                          ))}
                       </View>
                     )}  
                   </View>
                 );
               })}
 
-              <View style={{ height: 24 }} />
+              <View style={{ height: 32 }} />
 
               <View style={styles.sectionRow}>
                 <Text style={styles.sectionTitle}>Completed Activities</Text>
-                <Text style={styles.sectionCount}>{completed.length}</Text>
+                <Text style={styles.sectionCount}>{completed.length} total</Text>
               </View>
 
               <View style={styles.subjectCardSmall}>
-                {completed.map((c, i) => (
-                  <View key={i} style={styles.activityItem}>
-                    <View>
-                      <Text style={styles.activityTitle}>{c.title}</Text>
-                      <Text style={styles.subMeta}>{c.submitted}</Text>
-                    </View>
+                {completed.map((c, i) => {
+                  // robust lookup: try exact, case-insensitive, contains match, or fallback
+                  const exact = subjectColors[c.subject];
+                  const ciKey = Object.keys(subjectColors).find(k => k.toLowerCase() === c.subject.toLowerCase());
+                  const partialKey = Object.keys(subjectColors).find(k => c.subject.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(c.subject.toLowerCase()));
+                  const col = exact || (ciKey && subjectColors[ciKey]) || (partialKey && subjectColors[partialKey]) || { accent: '#E6E6E6', lightBg: '#fff' };
+                  const bg = col.lightBg || col.accent;
+                  return (
+                    <View key={i} style={[styles.completedItem, { backgroundColor: bg, borderColor: col.accent, position: 'relative', paddingRight: 44 }] }>
+                      <Text style={[styles.activityTitle, { fontWeight: '700', color: '#0f172a' }]}>{c.title}</Text>
 
-                    <View style={{ alignItems: 'center' }}>
-                      <View style={styles.subjectTag}><Text style={styles.subjectTagText}>{c.subject}</Text></View>
+                      <Text style={[styles.subjectTagText, { backgroundColor: 'transparent', color: '#0f172a', marginTop: 8 }]}>{c.subject}</Text>
+
+                      <TouchableOpacity accessibilityRole="button" onPress={() => console.log('Star', c.title)} style={{ position: 'absolute', right: 12, top: 12 }}>
+                        <Ionicons name="star-outline" size={18} color={col.accent} />
+                      </TouchableOpacity>
                     </View>
-                  </View>
-                ))}
-              </View>
+                  );
+                })}
+              </View> 
             </ScrollView>
           </View>
         ) : (
@@ -468,7 +498,7 @@ const styles = StyleSheet.create<any>({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -481,20 +511,20 @@ const styles = StyleSheet.create<any>({
     fontWeight: '700',
   },
   subjectCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginBottom: 4,
-    padding: 8,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+    marginBottom: 12,
+    padding: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
   },
   subjectTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#fff',
+    color: '#0f172a',
     marginLeft: 8,
     flex: 1,
     flexWrap: 'wrap',
@@ -536,7 +566,7 @@ const styles = StyleSheet.create<any>({
   counterPlain: {
     fontWeight: '800',
     fontSize: 14,
-    color: '#fff',
+    color: '#0f172a',
   },
   activitiesList: {
     marginTop: 0,
@@ -579,12 +609,17 @@ const styles = StyleSheet.create<any>({
     shadowRadius: 8,
   },
   activityTitle: {
-    fontWeight: '600',
+    fontWeight: '400',
     fontSize: 14,
     color: '#0f172a',
     flex: 1,
     flexWrap: 'wrap',
     marginRight: 8,
+  },
+  dueText: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 6,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -616,15 +651,15 @@ const styles = StyleSheet.create<any>({
     flex: 1,
     marginTop: 80,
     marginBottom: Platform.OS === 'ios' ? 86 : 76,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 12,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+    padding: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    overflow: 'visible',
   },
   bodyScroll: {
     width: '100%',
@@ -683,15 +718,22 @@ const styles = StyleSheet.create<any>({
   },
 
   subjectCardSmall: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: 'transparent',
+    borderRadius: 0,
     marginBottom: 8,
-    padding: 8,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    padding: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+  },
+  completedItem: {
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(15,23,42,0.04)',
   },
   subjectTag: {
     backgroundColor: '#EFF6FF',
@@ -700,7 +742,7 @@ const styles = StyleSheet.create<any>({
     borderRadius: 12,
   },
   subjectTagText: {
-    color: '#2563EB',
+    color: '#0f172a',
     fontWeight: '700',
     fontSize: 12,
   },
