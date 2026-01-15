@@ -11,7 +11,7 @@ const path = require('path');
 
 const DIST_DIR = path.join(__dirname, '..', 'dist');
 const VIEWPORT_WIDTH = process.env.FORCE_MOBILE_WIDTH || '375';
-const MODE = process.env.FORCE_MOBILE_MODE || 'narrow'; // 'narrow' or 'scale'
+const MODE = process.env.FORCE_MOBILE_MODE || 'narrow'; // 'narrow' (responsive) or 'scale' (desktop scale-to-fit)
 
 function walkDir(dir, filelist = []) {
   const files = fs.readdirSync(dir);
@@ -28,8 +28,9 @@ function injectMobileIntoHtml(file) {
   if (!file.endsWith('.html')) return;
   let html = fs.readFileSync(file, 'utf8');
 
-  // Mobile viewport meta to enforce mobile layout width
-  const mobileViewport = `<meta name="viewport" content="width=${VIEWPORT_WIDTH}, initial-scale=1, maximum-scale=1, user-scalable=no">`;
+  // Mobile viewport meta — use device width for true mobile responsiveness by default
+  // If MODE === 'scale' we still insert a scale stylesheet later (using VIEWPORT_WIDTH)
+  const mobileViewport = `<meta name="viewport" content="width=device-width, initial-scale=1">`;
 
   if (/name=["']viewport["']/.test(html)) {
     html = html.replace(/<meta[^>]*name=["']viewport["'][^>]*>/i, mobileViewport);

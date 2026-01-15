@@ -58,7 +58,10 @@ Install Command	(npm install)
 Build Command	(npm run vercel-build)
 Output Directory	(dist)
 
-Force mobile rendering	This project injects a mobile viewport into every exported HTML file during the build. By default it forces a narrow mobile width (375px). To enable "scale-to-fit" mode (scales the mobile layout to fill desktop browsers), set the environment variable `FORCE_MOBILE_MODE=scale` in Vercel. You can customize the mobile width with `FORCE_MOBILE_WIDTH` (e.g. `414`). The script runs automatically as part of `npm run vercel-build`.
+# Force mobile rendering
+This project injects a responsive mobile viewport into every exported HTML file during the build so pages adapt to the device's actual width (uses `width=device-width, initial-scale=1`).
+
+If you want to force desktop browsers to display the mobile layout and scale it to fit, set the environment variable `FORCE_MOBILE_MODE=scale` in Vercel. In that mode the injector will add CSS that scales a fixed mobile base width (default `375px`) controlled by `FORCE_MOBILE_WIDTH` (e.g. `414`). The script runs automatically as part of `npm run vercel-build`.
 
 ## Host as web locally and find the folder dist
 Use npx expo export --platform web
