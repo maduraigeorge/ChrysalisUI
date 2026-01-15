@@ -15,7 +15,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import Logo from '../../components/chrysalis_logo';
+import Logo from '../../../components/chrysalis_logo';
 
 const { width, height } = Dimensions.get('window');
 
