@@ -50,6 +50,14 @@ Join our community of developers creating universal apps.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 
 
+## Vercel → Project → Settings → Build & Output
+
+Setting	Value
+Framework Preset	(Other)
+Install Command	(npm install)
+Build Command	(npx expo export --platform web)
+Output Directory	(dist)
+
 ## Host to vercel as web
 Use npx expo export --platform web
 
