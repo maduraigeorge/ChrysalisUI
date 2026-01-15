@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "copy-fonts": "node ./scripts/copy-vector-fonts.js",
-    "build": "npx expo export --platform web",
+    "build": "npm run vercel-build",
     "vercel-build": "npm run export:web",
     "export:web": "npm run copy-fonts && expo export --platform web && npm run publish-fonts && npm run fix-dist",
     "publish-fonts": "node ./scripts/publish-fonts-to-dist.js",
