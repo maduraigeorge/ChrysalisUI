@@ -1,0 +1,10 @@
+@font-face { font-family: 'ionicons'; src: url('./Ionicons.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'material'; src: url('./MaterialIcons.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'material-community'; src: url('./MaterialCommunityIcons.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'FontAwesome'; src: url('./FontAwesome.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'FontAwesome5Free-Brand'; src: url('./FontAwesome5_Brands.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'FontAwesome5Free-Regular'; src: url('./FontAwesome5_Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'FontAwesome5Free-Solid'; src: url('./FontAwesome5_Solid.ttf') format('truetype'); font-display: swap; }
+
+/* Provide fallbacks for css that references these families */
+.icon { font-family: 'ionicons', 'material', 'FontAwesome', system-ui; }
