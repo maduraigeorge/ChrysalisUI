@@ -3,6 +3,9 @@
     "name": "myApp",
     "slug": "myApp",
     "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -23,12 +26,8 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "bundler": "metro"
+      "favicon": "./assets/images/favicon.png"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ]
     "plugins": [
       "expo-router",
       [

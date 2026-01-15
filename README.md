@@ -48,3 +48,22 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+## Host to vercel as web
+Use npx expo export --platform web
+
+## after exporting it as Dist/html.
+
+Add vercel.json
+
+{
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
+
+## Push to Github
+git add .
+git commit -m "update"
+git push origin main
