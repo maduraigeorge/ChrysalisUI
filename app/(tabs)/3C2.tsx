@@ -131,8 +131,8 @@ export default function ParentDashboardScreen() {
 
   // Responsive helpers — compute runtime sizes so layout adapts across screen widths
   const { width: winWidth } = useWindowDimensions();
-  // increased horizontal padding for more comfortable left/right margins
-  const containerPadding = Math.max(20, Math.round(winWidth * 0.06)); // 6% min 20
+  // slightly reduced horizontal padding for a tighter layout
+  const containerPadding = Math.max(16, Math.round(winWidth * 0.05)); // 5% min 16
   const maxCardWidth = Math.min(920, Math.max(360, winWidth - 32));
   // fontScale: keeps type readable on small and large screens
   const fontScale = Math.max(0.9, Math.min(1.25, winWidth / 375));

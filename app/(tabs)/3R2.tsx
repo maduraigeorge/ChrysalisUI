@@ -117,7 +117,8 @@ export default function WelcomeScreen() {
 
   // Responsive helpers (used for sticky headers and scaled padding)
   const { width: winWidth } = useWindowDimensions();
-  const containerPadding = Math.max(14, Math.round(winWidth * 0.04));
+  // responsive horizontal padding: 5% of width, minimum 16px
+  const containerPadding = Math.max(16, Math.round(winWidth * 0.05));
   const maxCardWidth = Math.min(920, Math.max(360, winWidth - 32));
   const fontScale = Math.max(0.9, Math.min(1.25, winWidth / 375));
 
@@ -193,7 +194,7 @@ export default function WelcomeScreen() {
         </View>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { paddingHorizontal: containerPadding, maxWidth: maxCardWidth, alignSelf: 'center' }]}>
         {/* Dashboard sections */}
         {activeTab === 'Activities' ? (
           <View style={styles.bodyWrap}>
@@ -215,7 +216,7 @@ export default function WelcomeScreen() {
             const isOpen = !!openSubjects[sub.key];
 
                 return (
-                  <View key={sub.key} style={[styles.subjectCard]}>
+                  <View key={sub.key} style={[styles.subjectCard, { width: '100%' }]}>
                     <View style={[styles.subjectContainer, { borderColor: col.accent }]}> 
                       <TouchableOpacity onPress={() => toggleSubject(sub.key)}>
                         <View style={[styles.subjectHeaderGradient, { backgroundColor: col.headerBg || col.bg }]}>
