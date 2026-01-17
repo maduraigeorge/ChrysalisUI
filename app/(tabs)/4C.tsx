@@ -1,4 +1,4 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
@@ -76,6 +76,40 @@ function isHexLight(hex: string) {
   return lum > 200;
 }
 
+const STATUS_MAP: Record<string, any> = {
+  beginner: { label: 'Beginner', color: '#f97316' },
+  intermediate: { label: 'Intermediate', color: '#F59E0B' },
+  proficient: { label: 'Proficient', color: '#10B981' },
+};
+
+function getStatusProps(status: string) {
+  if (!status) return { label: '', color: '#94A3B8' };
+  return STATUS_MAP[(status || '').toLowerCase()] || { label: status, color: '#94A3B8' };
+}
+
+const STATUS_ICON_MAP: Record<string, string> = {
+  beginner: 'leaf',
+  intermediate: 'seedling',
+  proficient: 'tree',
+};
+
+function getStatusIcon(status: string) {
+  if (!status) return 'leaf';
+  return STATUS_ICON_MAP[(status || '').toLowerCase()] || 'leaf';
+}
+
+// map status to a numeric level used for rendering dashes (1..3)
+function getStatusLevel(status: string) {
+  const s = (status || '').toLowerCase();
+  if (s === 'beginner') return 1;
+  if (s === 'intermediate') return 2;
+  if (s === 'proficient') return 3;
+  return 0;
+}
+
+// dash palette (first = Pink, second = Orange, third = Green)
+const DASH_COLORS = ['#EC4899', '#F97316', '#10B981']; 
+
 export default function ParentDashboardScreen() {
   React.useEffect(() => {
     if (Platform.OS === 'android' && (UIManager as any)?.setLayoutAnimationEnabledExperimental) {
@@ -84,11 +118,11 @@ export default function ParentDashboardScreen() {
   }, []);
 
   const subjects = [
-    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24', dueDate: '10/02/2026' }, { title: 'ACTIVITY 1.17', dueDate: '15/02/2026' }] },
-    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3', dueDate: '12/02/2026' }] },
-    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1', dueDate: '18/02/2026' }] },
-    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1', dueDate: '09/02/2026' }, { title: 'Plants and Growth 2.4', dueDate: '20/02/2026' }] },
-    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5', dueDate: '14/02/2026' }] },
+    { key: 'Mathematics', count: 2, status: 'intermediate', activities: [{ title: 'THINK AND INK 1.24', dueDate: '10/02/2026', status: 'beginner' }, { title: 'ACTIVITY 1.17', dueDate: '15/02/2026', status: 'intermediate' }] },
+    { key: 'Environmental Studies', count: 1, status: 'proficient', activities: [{ title: 'Activity 2.3', dueDate: '12/02/2026', status: 'proficient' }] },
+    { key: 'Social', count: 1, status: 'beginner', activities: [{ title: 'Look Beyond 2.1', dueDate: '18/02/2026', status: 'beginner' }] },
+    { key: 'Science', count: 2, status: 'intermediate', activities: [{ title: 'Explore Matter 1.1', dueDate: '09/02/2026', status: 'intermediate' }, { title: 'Plants and Growth 2.4', dueDate: '20/02/2026', status: 'intermediate' }] },
+    { key: 'English', count: 1, status: 'proficient', activities: [{ title: 'Storytelling 1.5', dueDate: '14/02/2026', status: 'proficient' }] },
   ];
 
   const completed = [
@@ -112,9 +146,20 @@ export default function ParentDashboardScreen() {
     English: 'menu-book',
   };
 
-  // subjectColors moved to module scope (above)
+  const STATUS_MAP: Record<string, any> = {
+    beginner: { label: 'Beginner', color: '#f97316' },
+    intermediate: { label: 'Intermediate', color: '#F59E0B' },
+    proficient: { label: 'Proficient', color: '#10B981' },
+  };
 
-  const [activeTab, setActiveTab] = React.useState<'Activities' | 'Insights'>('Activities');
+  function getStatusProps(status: string) {
+    if (!status) return { label: '', color: '#94A3B8' };
+    return STATUS_MAP[(status || '').toLowerCase()] || { label: status, color: '#94A3B8' };
+  }
+
+  // subjectColors moved to module scope (above) 
+
+  const [activeTab, setActiveTab] = React.useState<'Activities' | 'Insights'>('Insights');
   const [openSubjects, setOpenSubjects] = React.useState<Record<string, boolean>>({ [subjects[0].key]: true });
 
   function toggleSubject(key: string) {
@@ -184,6 +229,7 @@ export default function ParentDashboardScreen() {
                   icon={iconMap[s.key] || 'book'}
                   title={s.key}
                   badge={`${s.count}`}
+                  isInsights={false}
                   expanded={!!openSubjects[s.key]}
                   onToggle={() => toggleSubject(s.key)}
                   fontScale={fontScale}
@@ -195,6 +241,8 @@ export default function ParentDashboardScreen() {
                       dueDate={a.dueDate}
                       bg={'#fff'}
                       accent={subjectColors[s.key]?.accent ?? (colorMap[s.key] || '#5D5FEF')}
+                      status={a.status}
+                      isInsights={false}
                       fontScale={fontScale}
                     />
                   ))} 
@@ -227,9 +275,102 @@ export default function ParentDashboardScreen() {
             </ScrollView>
           </>
         ) : (
-          <View style={{ marginTop: 16 }}>
-            <Text style={styles.insightsText}>Insights coming soon — visualizations and reports will appear here.</Text>
-          </View>
+          <>
+            <ScrollView style={{ width: '100%', flex: 1 }} contentContainerStyle={{ paddingBottom: 140, flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+
+
+
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Kabir's Performance</Text>
+                <Text style={[styles.sectionCount, { fontSize: Math.round(13 * fontScale) }]}>{subjects.reduce((n, s) => n + (s.count || (s.activities?.length || 0)), 0)} total</Text>
+              </View>
+
+              {subjects.map(s => (
+                <SubjectCard
+                  key={s.key}
+                  color={colorMap[s.key] || '#5D5FEF'}
+                  icon={iconMap[s.key] || 'book'}
+                  title={s.key}
+                  badge={`${s.count}`}
+                  status={s.status}
+                  isInsights={true}
+                  expanded={!!openSubjects[s.key]}
+                  onToggle={() => toggleSubject(s.key)}
+                  fontScale={fontScale}
+                >
+                  {s.activities?.map((a: any, i: number) => (
+                    <ActivityRow
+                      key={i}
+                      title={a.title}
+                      dueDate={a.dueDate}
+                      bg={'#fff'}
+                      accent={subjectColors[s.key]?.accent ?? (colorMap[s.key] || '#5D5FEF')}
+                      status={a.status}
+                      isInsights={true}
+                      fontScale={fontScale}
+                    />
+                  ))} 
+                </SubjectCard>
+              ))} 
+
+              <View style={{ height: 20 }} />
+
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Completed Activities</Text>
+                <Text style={[styles.sectionCount, { fontSize: Math.round(13 * fontScale) }]}>{completed.length} total</Text>
+              </View>
+
+              {completed.map((c, i) => {
+                const exact = subjectColors[c.subject];
+                const ciKey = Object.keys(subjectColors).find(k => k.toLowerCase() === c.subject.toLowerCase());
+                const partialKey = Object.keys(subjectColors).find(k => c.subject.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(c.subject.toLowerCase()));
+                const col = exact || (ciKey && subjectColors[ciKey]) || (partialKey && subjectColors[partialKey]) || { accent: '#E6E6E6', lightBg: '#fff' };
+                const bg = col.lightBg || col.accent;
+                const textColor = isHexLight(bg) ? '#0f172a' : '#0f172a';
+
+                return (
+                  <View key={i} style={[styles.completedCard, { marginTop: 12, backgroundColor: bg, borderColor: col.accent, padding: Math.round(16 * fontScale), borderRadius: Math.round(20 * fontScale) }]}> 
+                    <Text style={[styles.completedTitle, { color: textColor, fontSize: Math.round(16 * fontScale) }]}>{c.title}</Text>
+                    <Text style={[styles.completedMeta, { color: textColor, marginTop: 8, fontSize: Math.round(13 * fontScale) }]}>{c.subject}</Text>
+                  </View>
+                );
+              })}
+
+              {/* Status legend (two-line: long dashes above labels) */}
+              <View style={[styles.legendWrap, { marginTop: Math.round(12 * fontScale), marginBottom: Math.round(24 * fontScale), alignItems: 'center', justifyContent: 'center' }]}> 
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', maxWidth: Math.round(360 * fontScale) }}>
+                  <View style={styles.legendColumn}>
+                    <View style={[styles.statusDash, { backgroundColor: DASH_COLORS[0], width: Math.round(110 * fontScale), height: Math.round(8 * fontScale), borderRadius: Math.round(4 * fontScale) }]} />
+                  </View>
+
+                  <View style={styles.legendColumn}>
+                    <View style={[styles.statusDash, { backgroundColor: DASH_COLORS[1], width: Math.round(110 * fontScale), height: Math.round(8 * fontScale), borderRadius: Math.round(4 * fontScale) }]} />
+                  </View>
+
+                  <View style={styles.legendColumn}>
+                    <View style={[styles.statusDash, { backgroundColor: DASH_COLORS[2], width: Math.round(110 * fontScale), height: Math.round(8 * fontScale), borderRadius: Math.round(4 * fontScale) }]} />
+                  </View>
+                </View>
+
+                <View style={{ height: Math.round(8 * fontScale) }} />
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', maxWidth: Math.round(360 * fontScale) }}>
+                  <View style={styles.legendColumn}>
+                    <Text style={[styles.legendLabel, { fontSize: Math.round(12 * fontScale), color: DASH_COLORS[0], textAlign: 'center' }]}>Beginner</Text>
+                  </View>
+
+                  <View style={styles.legendColumn}>
+                    <Text style={[styles.legendLabel, { fontSize: Math.round(12 * fontScale), color: DASH_COLORS[1], textAlign: 'center' }]}>Intermediate</Text>
+                  </View>
+
+                  <View style={styles.legendColumn}>
+                    <Text style={[styles.legendLabel, { fontSize: Math.round(12 * fontScale), color: DASH_COLORS[2], textAlign: 'center' }]}>Proficient</Text>
+                  </View>
+                </View>
+              </View>
+
+            </ScrollView>
+          </>
         )}
 
       </View>
@@ -281,7 +422,7 @@ export default function ParentDashboardScreen() {
 
 /* ───────── COMPONENTS ───────── */
 
-function SubjectCard({ color, icon, title, meta, badge, children, expanded, onToggle, fontScale = 1 }: any) {
+function SubjectCard({ color, icon, title, meta, badge, status, isInsights = false, children, expanded, onToggle, fontScale = 1 }: any) {
   const isExpanded = typeof expanded === 'boolean' ? expanded : true;
   const handleToggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -296,49 +437,77 @@ function SubjectCard({ color, icon, title, meta, badge, children, expanded, onTo
   const badgeBg = accent;
   const badgeTextColor = isHexLight(badgeBg) ? '#0f172a' : '#fff';
 
+  const sp = getStatusProps(status);
+
+  // inject subject-level status into child ActivityRow elements if they don't already have a status
+  const childrenWithStatus = React.Children.map(children, (child: any) => {
+    if (!React.isValidElement(child)) return child;
+    const childStatus = (child as any).props && (child as any).props.status ? (child as any).props.status : status;
+    return (React.cloneElement as any)(child, { status: childStatus });
+  });
+
   return (
-    <View style={[styles.subjectCard, { width: '100%' }]}>
-      <View style={subjectLeftStripe(stripeColor)} />
-      <View style={[styles.subjectContent, { padding: Math.round(8 * fontScale) }]}>
-        <TouchableOpacity
-          onPress={handleToggle}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel={`${title} section`}
-        >
-          <View style={[styles.subjectHeaderRow, { alignItems: 'center' }]}>
-            <View style={[styles.subjectIconBox, { backgroundColor: iconBoxBg, padding: Math.round(8 * fontScale), borderRadius: Math.round(12 * fontScale) }]}>
-              <MaterialIcons name={icon} size={Math.round(20 * fontScale)} color={accent} />
+    <View style={[styles.subjectCardTile, { borderColor: (stripeColor || '#E6E6E6') + '22' }]}>
+      <TouchableOpacity
+        onPress={handleToggle}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel={`${title} section`}
+      >
+        <View style={[styles.subjectHeaderTile, { padding: Math.round(10 * fontScale) }]}>
+          {isInsights ? (
+            <View style={{ width: Math.round(36 * fontScale), alignItems: 'center', justifyContent: 'center' }}>
+              <MaterialIcons name={icon as any} size={Math.round(20 * fontScale)} color={accent} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.subjectTitle, { fontSize: Math.round(16 * fontScale) }]}>{title}</Text>
-              {meta ? <Text style={[styles.subjectMeta, { fontSize: Math.round(12 * fontScale), marginTop: 2 }]}>{meta}</Text> : null}
+          ) : (
+            <View style={[styles.subjectTileIcon, { backgroundColor: accent, width: Math.round(56 * fontScale), height: Math.round(56 * fontScale), borderRadius: Math.round(12 * fontScale) }]}>
+              <MaterialIcons name={icon} size={Math.round(26 * fontScale)} color={isHexLight(accent) ? '#0f172a' : '#fff'} />
             </View>
-            {badge && (
-              <View style={[styles.badge, { backgroundColor: badgeBg, minWidth: Math.round(18 * fontScale), height: Math.round(18 * fontScale), borderRadius: Math.round(9 * fontScale) }]}>
+          )}
+
+          <View style={{ marginLeft: 12, flex: 1 }}>
+            <Text style={[styles.subjectTitleTile, { fontSize: Math.round(16 * fontScale) }]}>{title}</Text>
+            {meta ? <Text style={[styles.subjectMetaTile, { fontSize: Math.round(12 * fontScale), marginTop: 4 }]}>{meta}</Text> : null}
+
+            {isInsights && status ? (
+              <View style={{ marginTop: 8 }}>
+                <View style={styles.statusLineWrap}>
+                  {Array.from({ length: getStatusLevel(status) }).map((_, idx) => (
+                    <View key={idx} style={[styles.statusDash, { backgroundColor: DASH_COLORS[idx] || getStatusProps(status).color }]} />
+                  ))}
+                </View>
+              </View>
+            ) : null} 
+
+          </View>
+
+          <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+            {badge && !isInsights && (
+              <View style={[styles.badge, { backgroundColor: badgeBg, minWidth: Math.round(20 * fontScale), height: Math.round(20 * fontScale), borderRadius: Math.round(10 * fontScale) }]}>
                 <Text style={[styles.badgeText, { color: badgeTextColor, fontSize: Math.round(10 * fontScale) }]}>{badge}</Text>
               </View>
             )}
-            <MaterialIcons
-              name={isExpanded ? 'expand-less' : 'expand-more'}
-              size={Math.round(18 * fontScale)}
-              color="#64748B"
-              style={styles.expandIcon}
-            />
-          </View>
-        </TouchableOpacity>
 
-        {isExpanded && (
-          <View style={[styles.accordion, { backgroundColor: iconBoxBg, padding: Math.round(6 * fontScale), borderRadius: Math.round(10 * fontScale) }]}> 
-            <View style={[styles.accordionInner, { paddingVertical: Math.round(2 * fontScale) }]}>
-              {children}
+            <View style={{ alignItems: 'center', marginTop: 6 }}>
+              <MaterialIcons
+                name={isExpanded ? 'expand-less' : 'expand-more'}
+                size={Math.round(14 * fontScale)}
+                color="#64748B"
+                style={{ marginTop: 6 }}
+              />
             </View>
-          </View>
-        )}
-      </View>
+          </View> 
+        </View>
+      </TouchableOpacity>
+
+      {isExpanded && (
+        <View style={[styles.subjectTilesWrap, { paddingHorizontal: Math.round(10 * fontScale), paddingBottom: Math.round(12 * fontScale) }]}>
+          {childrenWithStatus}
+        </View>
+      )}
     </View>
   );
-}
+} 
 
 
 // Helper: robust date parsing for dd/mm/yyyy, ISO strings, or Date objects
@@ -373,7 +542,7 @@ function formatDateShort(date: Date) {
   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
 }
 
-function ActivityRow({ title, dueDate, bg, accent, fontScale = 1 }: any) {
+function ActivityRow({ title, dueDate, bg, accent, status, isInsights = false, fontScale = 1 }: any) {
   const background = bg ?? '#fff';
   const border = accent || '#5D5FEF';
 
@@ -402,32 +571,59 @@ function ActivityRow({ title, dueDate, bg, accent, fontScale = 1 }: any) {
     }
   }
 
-  return (
-    <View
-      style={[
-        styles.activityRow,
-        {
-          backgroundColor: background,
-          borderWidth: 1,
-          borderColor: border,
-          borderRadius: Math.round(14 * fontScale),
-          paddingHorizontal: Math.round(12 * fontScale),
-          paddingVertical: Math.round(8 * fontScale),
-        },
-      ]}>
-      <View style={{ flex: 1 }}>
-        <Text style={[styles.activityTitle, { color: '#0f172a', fontSize: Math.round(13 * fontScale), fontWeight: '600' }]} numberOfLines={2}>
-          {title}
-        </Text>
-        <Text style={[styles.dueText, { color: dueColor, fontSize: Math.round(12 * fontScale) }]}>{dueLabel}</Text>
-      </View>
+  const sp = getStatusProps(status);
+  const level = getStatusLevel(status);
 
-      <View style={styles.activityRight}>
-        <MaterialIcons name="photo-camera" size={Math.round(16 * fontScale)} color="#0f172a" />
+  // simple performance summary derived from status (placeholder data)
+  function getPerformance(status: string) {
+    const s = (status || '').toLowerCase();
+    if (s === 'beginner') return { score: 52, completion: 42, text: 'Students are struggling; needs targeted support.' };
+    if (s === 'intermediate') return { score: 73, completion: 68, text: 'Students are progressing; reinforce concepts.' };
+    if (s === 'proficient') return { score: 88, completion: 92, text: 'Strong understanding; ready for extension.' };
+    return { score: 0, completion: 0, text: 'No data available.' };
+  }
+
+  const perf = getPerformance(status);
+
+  return (
+    <View style={{ width: '100%', paddingVertical: 4 }}>
+      <View style={[styles.activityTile, { borderColor: (border || '#e6e6e6') + '22' }]}>
+        <View style={{ flex: 1 }}>
+          {isInsights ? (
+            <>
+                <Text style={[styles.subjectMetaTile, { fontSize: Math.round(12 * fontScale) }]}>Lesson</Text>
+              <Text style={[styles.activityTileTitle, { fontSize: Math.round(14 * fontScale) }]} numberOfLines={2}>{title}</Text>
+
+              {isInsights && level ? (
+                <View style={{ marginTop: 6 }}>
+                  <View style={styles.statusLineWrap}>
+                    {Array.from({ length: level }).map((_, idx) => (
+                      <View key={idx} style={[styles.statusDash, { backgroundColor: DASH_COLORS[idx] || sp.color }]} />
+                    ))}
+                  </View>
+                </View>
+              ) : null} 
+
+              <Text style={[styles.activityTileDue, { color: '#64748B', fontSize: Math.round(12 * fontScale), marginTop: 6 }]}>{sp.label} • Avg score: {perf.score}% • Completed: {perf.completion}%</Text>
+              <Text style={[styles.activityInsightText, { fontSize: Math.round(12 * fontScale), marginTop: 8 }]} numberOfLines={2}>{perf.text}</Text> 
+            </>
+          ) : (
+            <>
+              <Text style={[styles.activityTileTitle, { fontSize: Math.round(14 * fontScale) }]} numberOfLines={2}>{title}</Text>
+              <Text style={[styles.activityTileDue, { color: dueColor, fontSize: Math.round(12 * fontScale), marginTop: 4 }]}>{dueLabel}</Text>
+            </>
+          )}
+        </View>
+
+        <View style={{ marginLeft: 8, alignItems: 'flex-end', justifyContent: 'center' }}>
+          {!isInsights && (
+            <MaterialIcons name="photo-camera" size={20} color="#94A3B8" accessibilityLabel="Camera" />
+          )} 
+        </View>
       </View>
     </View>
   );
-}
+} 
 
 /* ───────── STYLES ───────── */
 
@@ -662,21 +858,77 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 
-  /* ACTIVITY ROW */
-  activityRow: {
-    borderRadius: 14,
-    backgroundColor: '#FEF2F2',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+  /* ACTIVITY TILE (card-like) */
+  activityTile: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(15,23,42,0.04)',
+    padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  activityTileLeft: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityTileTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  activityTileDue: {
+    color: '#64748B',
     marginTop: 6,
   },
-  activityTitle: {
-    flex: 1,
+
+  /* SUBJECT (tile style) */
+  subjectCardTile: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(15,23,42,0.04)',
+    marginTop: 8,
+    marginBottom: 8,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  subjectHeaderTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  subjectTileIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subjectTitleTile: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  subjectMetaTile: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#111827',
+    color: '#64748B',
+  },
+  subjectTilesWrap: {
+    paddingTop: 8,
+    paddingHorizontal: 12,
+    gap: 8,
   },
 
   /* Accordion container (subject background) */
@@ -789,6 +1041,80 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   },
 
+  /* STATUS PILL */
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '700',
+  },
+
+  activityInsightText: {
+    color: '#475569',
+    lineHeight: 18,
+  },
+
+  statusProminent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+
+  /* Legend styles */
+  legendWrap: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 2,
+    paddingHorizontal: 12,
+    flexWrap: 'wrap',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 6,
+    marginVertical: 6,
+  },
+  legendColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  legendLabel: {
+    marginLeft: 6,
+    color: '#475569',
+    fontWeight: '600',
+  },
+
+  /* status-line (simple bar made of dashes) */
+  statusLineWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDash: {
+    width: 22,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 8,
+    backgroundColor: '#94A3B8',
+  },
+
   footerContainer: {
     position: 'absolute',
     left: 0,
@@ -797,5 +1123,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 999,
     paddingBottom: Platform.OS === 'ios' ? 12 : 8,
-  },
+  }
 });

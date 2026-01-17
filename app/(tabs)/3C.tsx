@@ -150,7 +150,7 @@ export default function ParentDashboardScreen() {
 
       <View style={[styles.headerBar, styles.headerBarSticky]}>
         <View style={styles.headerLeft}>
-          <MaterialIcons name="person" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <MaterialIcons name="supervisor-account" size={20} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
         </View>
 
@@ -225,9 +225,61 @@ export default function ParentDashboardScreen() {
             </ScrollView>
           </>
         ) : (
-          <View style={{ marginTop: 16 }}>
-            <Text style={styles.insightsText}>Insights coming soon — visualizations and reports will appear here.</Text>
-          </View>
+          <>
+            <ScrollView style={{ width: '100%', flex: 1 }} contentContainerStyle={{ paddingBottom: 140, flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Assigned Activities</Text>
+                <Text style={[styles.sectionCount, { fontSize: Math.round(13 * fontScale) }]}>{subjects.reduce((n, s) => n + (s.count || (s.activities?.length || 0)), 0)} total</Text>
+              </View>
+
+              {subjects.map(s => (
+                <SubjectCard
+                  key={s.key}
+                  color={colorMap[s.key] || '#5D5FEF'}
+                  icon={iconMap[s.key] || 'book'}
+                  title={s.key}
+                  badge={`${s.count}`}
+                  expanded={!!openSubjects[s.key]}
+                  onToggle={() => toggleSubject(s.key)}
+                  fontScale={fontScale}
+                >
+                  {s.activities?.map((a: any, i: number) => (
+                    <ActivityRow
+                      key={i}
+                      title={a.title}
+                      bg={'#fff'}
+                      accent={subjectColors[s.key]?.accent ?? (colorMap[s.key] || '#5D5FEF')}
+                      fontScale={fontScale}
+                    />
+                  ))}
+                </SubjectCard>
+              ))} 
+
+              <View style={{ height: 20 }} />
+
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Completed Activities</Text>
+                <Text style={[styles.sectionCount, { fontSize: Math.round(13 * fontScale) }]}>{completed.length} total</Text>
+              </View>
+
+              {completed.map((c, i) => {
+                const exact = subjectColors[c.subject];
+                const ciKey = Object.keys(subjectColors).find(k => k.toLowerCase() === c.subject.toLowerCase());
+                const partialKey = Object.keys(subjectColors).find(k => c.subject.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(c.subject.toLowerCase()));
+                const col = exact || (ciKey && subjectColors[ciKey]) || (partialKey && subjectColors[partialKey]) || { accent: '#E6E6E6', lightBg: '#fff' };
+                const bg = col.lightBg || col.accent;
+                const textColor = isHexLight(bg) ? '#0f172a' : '#0f172a';
+
+                return (
+                  <View key={i} style={[styles.completedCard, { marginTop: 12, backgroundColor: bg, borderColor: col.accent, padding: Math.round(16 * fontScale), borderRadius: Math.round(20 * fontScale) }]}> 
+                    <Text style={[styles.completedTitle, { color: textColor, fontSize: Math.round(16 * fontScale) }]}>{c.title}</Text>
+                    <Text style={[styles.completedMeta, { color: textColor, marginTop: 8, fontSize: Math.round(13 * fontScale) }]}>{c.subject}</Text>
+                  </View>
+                );
+              })}
+
+            </ScrollView>
+          </>
         )}
 
       </View>

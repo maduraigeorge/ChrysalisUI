@@ -137,7 +137,7 @@ export default function WelcomeScreen() {
       {/* Header */}
       <View style={[styles.headerBar, styles.headerBarSticky, isDark && styles.headerBarDark]}>
         <View style={styles.headerLeft}>
-          <MaterialIcons name="person" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <MaterialIcons name="supervisor-account" size={20} color="#fff" style={{ marginRight: 8 }} />
           <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Parent Dashboard</Text>
         </View>
 
