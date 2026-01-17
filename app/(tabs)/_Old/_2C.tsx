@@ -15,7 +15,7 @@ import {
     View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Logo from '../../components/chrysalis_logo';
+import Logo from '@/components/chrysalis_logo';
 
 const { width, height } = Dimensions.get('window');
 

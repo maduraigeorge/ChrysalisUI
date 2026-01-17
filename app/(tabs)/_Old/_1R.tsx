@@ -15,7 +15,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Logo from '../../components/chrysalis_logo';
+import Logo from '@/components/chrysalis_logo';
 
 const { width, height } = Dimensions.get('window');
 

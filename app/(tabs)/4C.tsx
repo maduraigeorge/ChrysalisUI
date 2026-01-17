@@ -4,6 +4,7 @@ import React from 'react';
 import {
     Dimensions,
     LayoutAnimation,
+    Modal,
     Platform,
     ScrollView,
     StyleSheet,
@@ -12,6 +13,8 @@ import {
     UIManager,
     View,
     useWindowDimensions,
+    Image,
+    Linking,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -118,11 +121,23 @@ export default function ParentDashboardScreen() {
   }, []);
 
   const subjects = [
-    { key: 'Mathematics', count: 2, status: 'intermediate', activities: [{ title: 'THINK AND INK 1.24', dueDate: '10/02/2026', status: 'beginner' }, { title: 'ACTIVITY 1.17', dueDate: '15/02/2026', status: 'intermediate' }] },
-    { key: 'Environmental Studies', count: 1, status: 'proficient', activities: [{ title: 'Activity 2.3', dueDate: '12/02/2026', status: 'proficient' }] },
-    { key: 'Social', count: 1, status: 'beginner', activities: [{ title: 'Look Beyond 2.1', dueDate: '18/02/2026', status: 'beginner' }] },
-    { key: 'Science', count: 2, status: 'intermediate', activities: [{ title: 'Explore Matter 1.1', dueDate: '09/02/2026', status: 'intermediate' }, { title: 'Plants and Growth 2.4', dueDate: '20/02/2026', status: 'intermediate' }] },
-    { key: 'English', count: 1, status: 'proficient', activities: [{ title: 'Storytelling 1.5', dueDate: '14/02/2026', status: 'proficient' }] },
+    { key: 'Mathematics', count: 2, status: 'intermediate', activities: [
+      { title: 'Addition', dueDate: '10/02/2026', status: 'beginner', description: 'Handwriting & composition exercises focused on number formation and practice.', image: 'https://picsum.photos/600/300?random=1', attachments: [{ label: 'Worksheet - Addition.pdf', url: 'https://example.com/worksheet-addition.pdf' }] },
+      { title: 'Numbers and Patterns', dueDate: '15/02/2026', status: 'intermediate', description: 'Intro to numeric patterns and simple problem solving.', image: 'https://picsum.photos/600/300?random=2', attachments: [{ label: 'Pattern Cards.zip', url: 'https://example.com/pattern-cards.zip' }] }
+    ] },
+    { key: 'Environmental Studies', count: 1, status: 'proficient', activities: [
+      { title: 'Habitats and Plants', dueDate: '12/02/2026', status: 'proficient', description: 'Students observe local plant habitats and growth.', image: 'https://picsum.photos/600/300?random=3', attachments: [{ label: 'Field Guide.pdf', url: 'https://example.com/field-guide.pdf' }] }
+    ] },
+    { key: 'Social', count: 1, status: 'beginner', activities: [
+      { title: 'Community Helpers', dueDate: '18/02/2026', status: 'beginner', description: 'Exploring roles in our community through stories and roleplay.', image: 'https://picsum.photos/600/300?random=4', attachments: [{ label: 'Roleplay Script.txt', url: 'https://example.com/roleplay-script.txt' }] }
+    ] },
+    { key: 'Science', count: 2, status: 'intermediate', activities: [
+      { title: 'Explore Matter', dueDate: '09/02/2026', status: 'intermediate', description: 'Basic properties of matter with hands-on experiments.', image: 'https://picsum.photos/600/300?random=5', attachments: [{ label: 'Experiment Guide.pdf', url: 'https://example.com/experiment-guide.pdf' }] },
+      { title: 'Plants and Growth', dueDate: '20/02/2026', status: 'intermediate', description: 'Study plant life cycles and measure growth.', image: 'https://picsum.photos/600/300?random=6', attachments: [{ label: 'Growth Tracker.csv', url: 'https://example.com/growth-tracker.csv' }] }
+    ] },
+    { key: 'English', count: 1, status: 'proficient', activities: [
+      { title: 'Storytelling Basics', dueDate: '14/02/2026', status: 'proficient', description: 'Developing narrative skills and oral storytelling.', image: 'https://picsum.photos/600/300?random=7', attachments: [{ label: 'Story Prompts.docx', url: 'https://example.com/story-prompts.docx' }] }
+    ] },
   ];
 
   const completed = [
@@ -182,6 +197,14 @@ export default function ParentDashboardScreen() {
   // fontScale: keeps type readable on small and large screens
   const fontScale = Math.max(0.9, Math.min(1.25, winWidth / 375));
 
+  // Lesson modal state for "read more" detail view
+  const [lessonModal, setLessonModal] = React.useState<{ visible: boolean; data?: any }>({ visible: false });
+  function openLessonModal(data: any) {
+    setLessonModal({ visible: true, data });
+  }
+  function closeLessonModal() {
+    setLessonModal({ visible: false, data: undefined });
+  }
 
   return (
     <View style={styles.container}>
@@ -237,15 +260,19 @@ export default function ParentDashboardScreen() {
                   {s.activities?.map((a: any, i: number) => (
                     <ActivityRow
                       key={i}
+                      index={i + 1}
                       title={a.title}
+                      description={a.description}
                       dueDate={a.dueDate}
+                      image={a.image}
+                      attachments={a.attachments}
                       bg={'#fff'}
                       accent={subjectColors[s.key]?.accent ?? (colorMap[s.key] || '#5D5FEF')}
                       status={a.status}
                       isInsights={false}
                       fontScale={fontScale}
                     />
-                  ))} 
+                  ))}  
                 </SubjectCard>
               ))} 
 
@@ -281,7 +308,7 @@ export default function ParentDashboardScreen() {
 
 
               <View style={styles.sectionRow}>
-                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Kabir's Performance</Text>
+                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Kabir's Progress</Text>
                 <Text style={[styles.sectionCount, { fontSize: Math.round(13 * fontScale) }]}>{subjects.reduce((n, s) => n + (s.count || (s.activities?.length || 0)), 0)} total</Text>
               </View>
 
@@ -301,40 +328,24 @@ export default function ParentDashboardScreen() {
                   {s.activities?.map((a: any, i: number) => (
                     <ActivityRow
                       key={i}
+                      index={i + 1}
                       title={a.title}
+                      description={a.description}
                       dueDate={a.dueDate}
+                      image={a.image}
+                      attachments={a.attachments}
                       bg={'#fff'}
                       accent={subjectColors[s.key]?.accent ?? (colorMap[s.key] || '#5D5FEF')}
                       status={a.status}
                       isInsights={true}
+                      onOpenLesson={openLessonModal}
                       fontScale={fontScale}
                     />
-                  ))} 
+                  ))}  
                 </SubjectCard>
               ))} 
 
               <View style={{ height: 20 }} />
-
-              <View style={styles.sectionRow}>
-                <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Completed Activities</Text>
-                <Text style={[styles.sectionCount, { fontSize: Math.round(13 * fontScale) }]}>{completed.length} total</Text>
-              </View>
-
-              {completed.map((c, i) => {
-                const exact = subjectColors[c.subject];
-                const ciKey = Object.keys(subjectColors).find(k => k.toLowerCase() === c.subject.toLowerCase());
-                const partialKey = Object.keys(subjectColors).find(k => c.subject.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(c.subject.toLowerCase()));
-                const col = exact || (ciKey && subjectColors[ciKey]) || (partialKey && subjectColors[partialKey]) || { accent: '#E6E6E6', lightBg: '#fff' };
-                const bg = col.lightBg || col.accent;
-                const textColor = isHexLight(bg) ? '#0f172a' : '#0f172a';
-
-                return (
-                  <View key={i} style={[styles.completedCard, { marginTop: 12, backgroundColor: bg, borderColor: col.accent, padding: Math.round(16 * fontScale), borderRadius: Math.round(20 * fontScale) }]}> 
-                    <Text style={[styles.completedTitle, { color: textColor, fontSize: Math.round(16 * fontScale) }]}>{c.title}</Text>
-                    <Text style={[styles.completedMeta, { color: textColor, marginTop: 8, fontSize: Math.round(13 * fontScale) }]}>{c.subject}</Text>
-                  </View>
-                );
-              })}
 
               {/* Status legend (two-line: long dashes above labels) */}
               <View style={[styles.legendWrap, { marginTop: Math.round(12 * fontScale), marginBottom: Math.round(24 * fontScale), alignItems: 'center', justifyContent: 'center' }]}> 
@@ -370,6 +381,50 @@ export default function ParentDashboardScreen() {
               </View>
 
             </ScrollView>
+
+            {/* Lesson detail modal */}
+            <Modal visible={lessonModal.visible} transparent animationType="slide" onRequestClose={closeLessonModal}>
+              <View style={styles.lessonModalOverlay}>
+                <View style={[styles.lessonModalContent, { padding: Math.round(16 * fontScale) }]}> 
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={[styles.modalTitle, { fontSize: Math.round(16 * fontScale) }]} numberOfLines={2}>{`Lesson ${lessonModal.data?.index || ''}: ${lessonModal.data?.title || ''}`}</Text>
+                    <TouchableOpacity onPress={closeLessonModal} accessibilityRole="button">
+                      <Text style={{ color: '#64748B' }}>Close</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <ScrollView style={{ marginTop: 12, maxHeight: '70%' }} contentContainerStyle={{ paddingBottom: 24 }}>
+                    {lessonModal.data?.image ? (
+                      <Image source={{ uri: lessonModal.data.image }} style={styles.lessonModalImage} />
+                    ) : null}
+
+                    <Text style={[styles.activityDescription, { marginTop: 12 }]}>{lessonModal.data?.description}</Text>
+
+                    <View style={{ marginTop: 12 }}>
+                      <Text style={[styles.activityTileDue, { marginBottom: 6 }]}>{`Due: ${lessonModal.data?.dueDate || 'TBD'}`}</Text>
+                      <Text style={[styles.activityTileDue, { marginBottom: 6 }]}>{`Status: ${lessonModal.data?.sp?.label || lessonModal.data?.status || ''}`}</Text>
+                    </View>
+
+                    <View style={{ marginTop: 8 }}>
+                      <Text style={[styles.activityInsightText, { marginBottom: 12 }]}>{lessonModal.data?.perf?.text || ''}</Text>
+                    </View>
+
+                    {lessonModal.data?.attachments?.length ? (
+                      <>
+                        <Text style={[styles.modalSectionTitle, { marginBottom: 8 }]}>Attachments</Text>
+                        {lessonModal.data.attachments.map((att: any, i: number) => (
+                          <TouchableOpacity key={i} style={styles.attachmentRow} onPress={() => att.url && Linking.openURL(att.url)}>
+                            <MaterialIcons name="attach-file" size={18} color="#64748B" style={styles.attachmentIcon} />
+                            <Text style={styles.attachmentLabel}>{att.label || att.url}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </>
+                    ) : null}
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
+
           </>
         )}
 
@@ -467,7 +522,7 @@ function SubjectCard({ color, icon, title, meta, badge, status, isInsights = fal
 
           <View style={{ marginLeft: 12, flex: 1 }}>
             <Text style={[styles.subjectTitleTile, { fontSize: Math.round(16 * fontScale) }]}>{title}</Text>
-            {meta ? <Text style={[styles.subjectMetaTile, { fontSize: Math.round(12 * fontScale), marginTop: 4 }]}>{meta}</Text> : null}
+            { !isInsights && meta ? <Text style={[styles.subjectMetaTile, { fontSize: Math.round(12 * fontScale), marginTop: 4 }]}>{meta}</Text> : null }
 
             {isInsights && status ? (
               <View style={{ marginTop: 8 }}>
@@ -477,25 +532,29 @@ function SubjectCard({ color, icon, title, meta, badge, status, isInsights = fal
                   ))}
                 </View>
               </View>
-            ) : null} 
+            ) : null}
 
           </View>
 
-          <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            {badge && !isInsights && (
+          <View style={{ alignItems: 'flex-end', justifyContent: 'flex-start' }}>
+            {isInsights ? (
               <View style={[styles.badge, { backgroundColor: badgeBg, minWidth: Math.round(20 * fontScale), height: Math.round(20 * fontScale), borderRadius: Math.round(10 * fontScale) }]}>
                 <Text style={[styles.badgeText, { color: badgeTextColor, fontSize: Math.round(10 * fontScale) }]}>{badge}</Text>
               </View>
+            ) : (
+              badge && (
+                <View style={[styles.badge, { backgroundColor: badgeBg, minWidth: Math.round(20 * fontScale), height: Math.round(20 * fontScale), borderRadius: Math.round(10 * fontScale) }]}>
+                  <Text style={[styles.badgeText, { color: badgeTextColor, fontSize: Math.round(10 * fontScale) }]}>{badge}</Text>
+                </View>
+              )
             )}
 
-            <View style={{ alignItems: 'center', marginTop: 6 }}>
-              <MaterialIcons
-                name={isExpanded ? 'expand-less' : 'expand-more'}
-                size={Math.round(14 * fontScale)}
-                color="#64748B"
-                style={{ marginTop: 6 }}
-              />
-            </View>
+            <MaterialIcons
+              name={isExpanded ? 'expand-less' : 'expand-more'}
+              size={Math.round(14 * fontScale)}
+              color="#64748B"
+              style={{ marginTop: 8 }}
+            />
           </View> 
         </View>
       </TouchableOpacity>
@@ -542,7 +601,7 @@ function formatDateShort(date: Date) {
   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
 }
 
-function ActivityRow({ title, dueDate, bg, accent, status, isInsights = false, fontScale = 1 }: any) {
+function ActivityRow({ title, description, dueDate, bg, accent, status, isInsights = false, fontScale = 1, index, onOpenLesson }: any) {
   const background = bg ?? '#fff';
   const border = accent || '#5D5FEF';
 
@@ -591,10 +650,10 @@ function ActivityRow({ title, dueDate, bg, accent, status, isInsights = false, f
         <View style={{ flex: 1 }}>
           {isInsights ? (
             <>
-                <Text style={[styles.subjectMetaTile, { fontSize: Math.round(12 * fontScale) }]}>Lesson</Text>
-              <Text style={[styles.activityTileTitle, { fontSize: Math.round(14 * fontScale) }]} numberOfLines={2}>{title}</Text>
+              <Text style={[styles.subjectMetaTile, { fontSize: Math.round(11 * fontScale), fontWeight: '700' }]}>{`Lesson ${index || ''}`}</Text>
+              <Text style={[styles.activityTileTitle, { fontSize: Math.round(14 * fontScale), marginTop: 2 }]} numberOfLines={2}>{title}</Text>
 
-              {isInsights && level ? (
+              {level ? (
                 <View style={{ marginTop: 6 }}>
                   <View style={styles.statusLineWrap}>
                     {Array.from({ length: level }).map((_, idx) => (
@@ -602,10 +661,14 @@ function ActivityRow({ title, dueDate, bg, accent, status, isInsights = false, f
                     ))}
                   </View>
                 </View>
-              ) : null} 
+              ) : null}
 
-              <Text style={[styles.activityTileDue, { color: '#64748B', fontSize: Math.round(12 * fontScale), marginTop: 6 }]}>{sp.label} • Avg score: {perf.score}% • Completed: {perf.completion}%</Text>
-              <Text style={[styles.activityInsightText, { fontSize: Math.round(12 * fontScale), marginTop: 8 }]} numberOfLines={2}>{perf.text}</Text> 
+              {description ? (
+                <Text style={[styles.activityDescription, { fontSize: Math.round(13 * fontScale), marginTop: 8 }]} numberOfLines={3}>{description}</Text>
+              ) : null}
+
+              <Text style={[styles.activityTileDue, { color: '#64748B', fontSize: Math.round(12 * fontScale), marginTop: 8 }]}>{`Kabir's performance: ${sp.label} • Avg score: ${perf.score}% • Completed: ${perf.completion}%`}</Text>
+              <Text style={[styles.activityInsightText, { fontSize: Math.round(12 * fontScale), marginTop: 6 }]} numberOfLines={3}>{perf.text}</Text>
             </>
           ) : (
             <>
@@ -616,9 +679,13 @@ function ActivityRow({ title, dueDate, bg, accent, status, isInsights = false, f
         </View>
 
         <View style={{ marginLeft: 8, alignItems: 'flex-end', justifyContent: 'center' }}>
-          {!isInsights && (
+          {isInsights ? (
+            <TouchableOpacity onPress={() => onOpenLesson && onOpenLesson({ index, title, description, dueDate, status, perf, sp, image, attachments })} accessibilityRole="button" accessibilityLabel="Lesson details" style={{ padding: 6 }}>
+              <FontAwesome5 name="lightbulb" size={18} color="#FBBF24" />
+            </TouchableOpacity>
+          ) : (
             <MaterialIcons name="photo-camera" size={20} color="#94A3B8" accessibilityLabel="Camera" />
-          )} 
+          )}
         </View>
       </View>
     </View>
@@ -1113,6 +1180,55 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     marginRight: 8,
     backgroundColor: '#94A3B8',
+  },
+
+  activityDescription: {
+    color: '#475569',
+    lineHeight: 18,
+  },
+
+  /* Lesson modal */
+  lessonModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  lessonModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  lessonModalImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  modalSectionTitle: {
+    fontWeight: '700',
+    color: '#0f172a',
+    fontSize: 14,
+    marginTop: 8,
+  },
+  attachmentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderRadius: 8,
+    backgroundColor: '#F8FAFC',
+    marginBottom: 8,
+  },
+  attachmentIcon: {
+    marginRight: 8,
+  },
+  attachmentLabel: {
+    color: '#475569',
   },
 
   footerContainer: {
