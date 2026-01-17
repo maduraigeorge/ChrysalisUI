@@ -32,9 +32,12 @@ export default function WelcomeScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  // responsive padding helper (fix for 'containerPadding' undefined)
+  // responsive helpers
   const { width: winWidth, height: winHeight } = useWindowDimensions();
-  const containerPadding = Math.max(16, Math.round(winWidth * 0.05));
+  const containerPadding = Math.max(16, Math.round(winWidth * 0.05)); // 5% min 16
+  const maxContentWidth = Math.min(540, Math.max(320, winWidth - containerPadding * 2));
+  const fontScale = Math.max(0.85, Math.min(1.25, winWidth / 375));
+  const logoSize = Math.min(160, Math.max(88, Math.round(winWidth * 0.28)));
 
   const scale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
@@ -54,24 +57,24 @@ export default function WelcomeScreen() {
       <BackgroundShapes isDark={isDark} />
 
       {/* Center content */}
-      <View style={[styles.centerBlock, styles.content]}>
-        <View style={[styles.logoCard, isDark && styles.logoCardDark]}>
-          <BlurView intensity={40} tint={isDark ? 'dark' : 'light'} style={styles.logoBlur} />
+      <View style={[styles.centerBlock, { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: Math.round(containerPadding / 2) }]}>
+        <View style={[styles.logoCard, isDark && styles.logoCardDark, { width: logoSize, height: logoSize, borderRadius: Math.round(logoSize * 0.25) }]}>
+          <BlurView intensity={40} tint={isDark ? 'dark' : 'light'} style={[styles.logoBlur, { borderRadius: Math.round(logoSize * 0.25) }]} />
           <Animated.View style={{ transform: [{ scale }] }}>
-            <Logo size={120} />
+            <Logo size={Math.round(logoSize * 0.9)} />
           </Animated.View>
         </View>
 
-        <Text style={[styles.title, { maxWidth: Math.min(540, width - 48) }, isDark && styles.textDark]}>
-          <Text style={styles.titleLight}>Welcome to </Text>
-          <Text style={styles.primary}>Chrysalis</Text>
+        <Text style={[styles.title, { fontSize: Math.round(34 * fontScale), maxWidth: maxContentWidth - 32 }, isDark && styles.textDark]}>
+          <Text style={[styles.titleLight, { fontSize: Math.round(34 * fontScale) }]}>Welcome to </Text>
+          <Text style={[styles.primary, { fontSize: Math.round(40 * fontScale) }]}>Chrysalis</Text>
         </Text>
-        <Text style={[styles.subtitle, isDark && styles.textDark]}>Adaptive learning for every child.</Text>
-        <View style={{ height: 28 }} />
-      </View>
+        <Text style={[styles.subtitle, isDark && styles.textDark, { fontSize: Math.round(16 * fontScale), maxWidth: Math.min(360, maxContentWidth - 32), marginTop: Math.round(10 * fontScale) }]}>Adaptive learning for every child.</Text>
+        <View style={{ height: Math.round(20 * fontScale) }} />
+      </View> 
 
       {/* Bottom buttons */}
-      <View style={[styles.bottomArea, styles.content]}>
+      <View style={[styles.bottomArea, { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: Math.round(containerPadding / 2), minHeight: Math.round(winHeight * 0.36) }]}>
         <PrimaryButton
           icon="business-outline"
           title="School Account"
@@ -203,8 +206,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 28,
     alignItems: 'center',
-    width: '92%',
-    alignSelf: 'center',
+    width: '100%',
+    alignSelf: 'stretch',
     marginVertical: 6,
   },
 

@@ -78,11 +78,11 @@ export default function WelcomeScreen() {
   const isDark = scheme === 'dark';
 
   const subjects = [
-    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24' }, { title: 'ACTIVITY 1.17' }] },
-    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3' }] },
-    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1' }] },
-    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1' }, { title: 'Plants and Growth 2.4' }] },
-    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5' }] },
+    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24', dueDate: '10/02/2026' }, { title: 'ACTIVITY 1.17', dueDate: '15/02/2026' }] },
+    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3', dueDate: '12/02/2026' }] },
+    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1', dueDate: '18/02/2026' }] },
+    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1', dueDate: '09/02/2026' }, { title: 'Plants and Growth 2.4', dueDate: '20/02/2026' }] },
+    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5', dueDate: '14/02/2026' }] },
   ];
 
   const subjectColors: Record<string, any> = {
