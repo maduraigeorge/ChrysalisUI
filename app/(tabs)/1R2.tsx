@@ -9,12 +9,14 @@ import {
   Platform,
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Logo from '../../components/chrysalis_logo';
 
 const { width, height } = Dimensions.get('window');
@@ -31,13 +33,17 @@ type ButtonProps = {
 export default function WelcomeScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const isNativeDark = isDark && Platform.OS !== 'web';
 
   // responsive helpers
   const { width: winWidth, height: winHeight } = useWindowDimensions();
+  const isPortrait = winHeight >= winWidth;
   const containerPadding = Math.max(16, Math.round(winWidth * 0.05)); // 5% min 16
-  const maxContentWidth = Math.min(540, Math.max(320, winWidth - containerPadding * 2));
-  const fontScale = Math.max(0.85, Math.min(1.25, winWidth / 375));
-  const logoSize = Math.min(160, Math.max(88, Math.round(winWidth * 0.28)));
+  const maxContentWidth = Math.min(720, Math.max(320, winWidth - containerPadding * 2));
+  const fontScale = Math.max(0.8, Math.min(1.25, winWidth / 375));
+  const logoSize = Math.min(220, Math.max(72, Math.round(winWidth * (isPortrait ? 0.28 : 0.18))));
+  const verticalSpacing = Math.round(12 * fontScale);
+  const insets = useSafeAreaInsets();
 
   const scale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
@@ -52,53 +58,130 @@ export default function WelcomeScreen() {
   }, [scale]);
 
   return (
-    <SafeAreaView style={[styles.container, (isDark && Platform.OS !== 'web') && styles.containerDark, { paddingHorizontal: containerPadding, paddingVertical: Math.round(Platform.OS === 'ios' ? Math.max(20, winHeight * 0.03) : 16) }]}>
+    <SafeAreaView style={[styles.container, (isNativeDark) && styles.containerDark, { paddingHorizontal: containerPadding, paddingVertical: Math.round(isPortrait ? Math.max(20, winHeight * 0.04) : Math.max(12, winHeight * 0.02)), paddingBottom: Math.round(insets.bottom || 0) }]}>
       {/* Child-friendly background decorations */}
-      <BackgroundShapes isDark={isDark} />
+      <BackgroundShapes isDark={isNativeDark} />
 
-      {/* Center content */}
-      <View style={[styles.centerBlock, { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: Math.round(containerPadding / 2) }]}>
-        <View style={[styles.logoCard, isDark && styles.logoCardDark, { width: logoSize, height: logoSize, borderRadius: Math.round(logoSize * 0.25) }]}>
-          <BlurView intensity={40} tint={isDark ? 'dark' : 'light'} style={[styles.logoBlur, { borderRadius: Math.round(logoSize * 0.25) }]} />
-          <Animated.View style={{ transform: [{ scale }] }}>
-            <Logo size={Math.round(logoSize * 0.9)} />
-          </Animated.View>
-        </View>
+      {/* Center content (portrait) or horizontal scroll (landscape) */}
+      {isPortrait ? (
+        <>
+          <View style={[styles.centerBlock, { flex: 1, width: '100%', maxWidth: maxContentWidth, paddingHorizontal: Math.round(containerPadding / 2), paddingVertical: Math.round(isPortrait ? 28 * fontScale : 12 * fontScale), justifyContent: 'center' }]}>
+            {/* Centered top content (logo + text) */}
+            <View style={{ alignSelf: 'stretch', flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: Math.round(6 * fontScale) }}>
+              <View style={[styles.logoCard, isNativeDark && styles.logoCardDark, { width: logoSize, height: logoSize, borderRadius: Math.round(logoSize * 0.25), backgroundColor: Platform.OS === 'web' ? '#fff' : undefined, borderWidth: Platform.OS === 'web' ? 1 : 0, borderColor: Platform.OS === 'web' ? 'rgba(14,165,233,0.06)' : undefined, transform: [{ translateY: 0 }] }]}>
+                <BlurView intensity={40} tint={isNativeDark ? 'dark' : 'light'} style={[styles.logoBlur, { borderRadius: Math.round(logoSize * 0.25) }]} />
+                <Animated.View style={{ transform: [{ scale }] }}>
+                  <Logo size={Math.round(logoSize * 0.9)} />
+                </Animated.View>
+              </View>
 
-        <Text style={[styles.title, { fontSize: Math.round(34 * fontScale), maxWidth: maxContentWidth - 32 }, isDark && styles.textDark]}>
-          <Text style={[styles.titleLight, { fontSize: Math.round(34 * fontScale) }]}>Welcome to </Text>
-          <Text style={[styles.primary, { fontSize: Math.round(40 * fontScale) }]}>Chrysalis</Text>
-        </Text>
-        <Text style={[styles.subtitle, isDark && styles.textDark, { fontSize: Math.round(16 * fontScale), maxWidth: Math.min(360, maxContentWidth - 32), marginTop: Math.round(10 * fontScale) }]}>Adaptive learning for every child.</Text>
-        <View style={{ height: Math.round(20 * fontScale) }} />
-      </View> 
+              <Text style={[styles.title, { fontSize: Math.round(34 * fontScale), maxWidth: maxContentWidth - 32 }, isNativeDark && styles.textDark, { marginTop: Math.round(8 * fontScale) }]}>
+                <Text style={[styles.titleLight, { fontSize: Math.round(34 * fontScale) }]}>Welcome to </Text>
+                <Text style={[styles.primary, { fontSize: Math.round(40 * fontScale) }]}>Chrysalis</Text>
+              </Text>
+              <Text style={[styles.subtitle, isNativeDark && styles.textDark, { fontSize: Math.round(16 * fontScale), maxWidth: Math.min(360, maxContentWidth - 32), marginTop: Math.round(8 * fontScale) }]}>Adaptive learning for every child.</Text>
+            </View>
+          </View>
 
-      {/* Bottom buttons */}
-      <View style={[styles.bottomArea, { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: Math.round(containerPadding / 2), minHeight: Math.round(winHeight * 0.36) }]}>
-        <PrimaryButton
-          icon="business-outline"
-          title="School Account"
-          subtitle="Sign in with school credentials"
-          onPress={() => console.log('School Account')}
-        />
+          <View style={[styles.bottomArea, { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: Math.round(containerPadding / 2), minHeight: Math.round(isPortrait ? winHeight * 0.36 : winHeight * 0.28), paddingVertical: Math.round(isPortrait ? 14 * fontScale : 10 * fontScale), paddingBottom: Math.round((isPortrait ? 20 * fontScale : 14 * fontScale) + (insets.bottom || 0)), marginBottom: Math.round(Math.max(isPortrait ? 16 * fontScale : 12 * fontScale, insets.bottom || 0)), flexDirection: isPortrait ? 'column' : 'row', alignItems: isPortrait ? 'stretch' : 'center', justifyContent: 'space-between', flexWrap: isPortrait ? 'nowrap' : 'wrap', alignContent: 'flex-end', transform: [{ translateY: isPortrait ? 16 : 8 }] }]}>
+            <View style={{ width: isPortrait ? '100%' : '48%', marginVertical: 2 }}>
+              <PrimaryButton
+                icon="business-outline"
+                title="School Account"
+                subtitle="Sign in with school credentials"
+                onPress={() => console.log('School Account')}
+              />
+            </View>
 
-        <SecondaryButton
-          icon="person-outline"
-          title="Personal Account"
-          subtitle="Sign in with a personal account"
-          onPress={() => console.log('Personal Account')}
-        />
+            <View style={{ width: isPortrait ? '100%' : '48%', marginVertical: 2 }}>
+              <SecondaryButton
+                icon="person-outline"
+                title="Personal Account"
+                subtitle="Sign in with a personal account"
+                onPress={() => console.log('Personal Account')}
+              />
+            </View>
 
-        <GhostButton
-          icon="add-circle-outline"
-          title="Create Account"
-          subtitle="New here? Set up your subscription"
-          onPress={() => console.log('Create Account')}
-        />
+            <View style={{ width: isPortrait ? '100%' : '48%', marginVertical: 2 }}>
+              <GhostButton
+                icon="add-circle-outline"
+                title="Create Account"
+                subtitle="New here? Set up your subscription"
+                onPress={() => console.log('Create Account')}
+              />
+            </View>
 
-        <Text style={[styles.helpText, isDark && { color: 'rgba(255,255,255,0.75)' }]}>Need help choosing?</Text>
+            <View style={{ width: isPortrait ? '100%' : '100%', marginTop: isPortrait ? 2 : 8, alignItems: 'center', paddingBottom: Math.round(Math.max(insets.bottom, 8 * fontScale)) }}>
+              <Text style={[styles.helpText, isNativeDark && { color: 'rgba(255,255,255,0.75)' }]}>Need help choosing?</Text>
+            </View>
 
-      </View> 
+          </View>
+          {/* Explicit spacer to guard against system / navigation bars hiding the last line */}
+          <View style={{ height: Math.round(Math.max(insets.bottom, 8 * fontScale)) }} />
+        </>
+      ) : (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          snapToInterval={winWidth}
+          decelerationRate="fast"
+          showsHorizontalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ height: '100%' }}
+        >
+          {/* Left: full-viewport panel containing centered logo + text */}
+          <View style={{ width: winWidth, justifyContent: 'center', alignItems: 'center', paddingVertical: Math.round(12 * fontScale) }}>
+            <View style={{ width: maxContentWidth, alignItems: 'center' }}>
+              <View style={[styles.logoCard, isNativeDark && styles.logoCardDark, { width: logoSize, height: logoSize, borderRadius: Math.round(logoSize * 0.25) }]}>
+                <BlurView intensity={40} tint={isNativeDark ? 'dark' : 'light'} style={[styles.logoBlur, { borderRadius: Math.round(logoSize * 0.25) }]} />
+                <Animated.View style={{ transform: [{ scale }] }}>
+                  <Logo size={Math.round(logoSize * 0.9)} />
+                </Animated.View>
+              </View>
+
+              <Text style={[styles.title, { fontSize: Math.round(34 * fontScale), maxWidth: maxContentWidth - 32 }, isNativeDark && styles.textDark, { marginTop: Math.round(8 * fontScale) }]}>
+                <Text style={[styles.titleLight, { fontSize: Math.round(34 * fontScale) }]}>Welcome to </Text>
+                <Text style={[styles.primary, { fontSize: Math.round(40 * fontScale) }]}>Chrysalis</Text>
+              </Text>
+              <Text style={[styles.subtitle, isNativeDark && styles.textDark, { fontSize: Math.round(16 * fontScale), maxWidth: Math.min(360, maxContentWidth - 32), marginTop: Math.round(8 * fontScale) }]}>Adaptive learning for every child.</Text>
+            </View>
+          </View>
+
+          {/* Right: full-viewport panel containing vertically stacked buttons */}
+          <View style={{ width: winWidth, justifyContent: 'center', alignItems: 'center', paddingVertical: Math.round(12 * fontScale) }}>
+            <View style={{ width: maxContentWidth }}>
+              <View style={{ width: '100%', marginVertical: 4 }}>
+                <PrimaryButton
+                  icon="business-outline"
+                  title="School Account"
+                  subtitle="Sign in with school credentials"
+                  onPress={() => console.log('School Account')}
+                />
+              </View>
+
+              <View style={{ width: '100%', marginVertical: 4 }}>
+                <SecondaryButton
+                  icon="person-outline"
+                  title="Personal Account"
+                  subtitle="Sign in with a personal account"
+                  onPress={() => console.log('Personal Account')}
+                />
+              </View>
+
+              <View style={{ width: '100%', marginVertical: 4 }}>
+                <GhostButton
+                  icon="add-circle-outline"
+                  title="Create Account"
+                  subtitle="New here? Set up your subscription"
+                  onPress={() => console.log('Create Account')}
+                />
+              </View>
+
+              <Text style={[styles.helpText, isNativeDark && { color: 'rgba(255,255,255,0.75)' }, { marginTop: Math.round(8 * fontScale), textAlign: 'center' }]}>Need help choosing?</Text>
+            </View>
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -208,7 +291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     alignSelf: 'stretch',
-    marginVertical: 6,
+    marginVertical: 4,
   },
 
   helpText: {
@@ -342,6 +425,8 @@ const styles = StyleSheet.create({
 function PrimaryButton({ icon, title, subtitle, onPress }: ButtonProps) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const { width: winWidth } = useWindowDimensions();
+  const localScale = Math.max(0.85, Math.min(1.25, winWidth / 375));
 
   return (
     <Pressable
@@ -350,13 +435,13 @@ function PrimaryButton({ icon, title, subtitle, onPress }: ButtonProps) {
       accessibilityLabel={title}
       style={({ pressed }) => [{ opacity: pressed ? 0.92 : 1, transform: [{ scale: pressed ? 0.996 : 1 }] }]}
     >
-      <LinearGradient colors={['#7c3aed', '#6366f1']} start={[0, 0]} end={[1, 1]} style={[styles.buttonBase, styles.primaryGradient]}>
-        <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255,255,255,0.18)' }]}> 
-          <Ionicons name={icon} size={20} color="#fff" />
+      <LinearGradient colors={['#7c3aed', '#6366f1']} start={[0, 0]} end={[1, 1]} style={[styles.buttonBase, styles.primaryGradient, { paddingVertical: Math.round(12 * localScale), paddingHorizontal: Math.round(14 * localScale), borderRadius: Math.round(28 * localScale) }]}>
+        <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255,255,255,0.18)', width: Math.round(48 * localScale), height: Math.round(48 * localScale), borderRadius: Math.round(14 * localScale) }]}> 
+          <Ionicons name={icon} size={Math.round(18 * localScale)} color="#fff" />
         </View>
-        <View>
-          <Text style={[styles.btnTitle, { color: '#fff' }]}>{title}</Text>
-          <Text style={[styles.btnSubtitle, { color: 'rgba(255,255,255,0.9)' }]}>{subtitle}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.btnTitle, { color: '#fff', fontSize: Math.round(16 * localScale) }]}>{title}</Text>
+          <Text style={[styles.btnSubtitle, { color: 'rgba(255,255,255,0.9)', fontSize: Math.round(12 * localScale) }]}>{subtitle}</Text>
         </View>
       </LinearGradient>
     </Pressable>
@@ -385,6 +470,8 @@ function BackgroundShapes({ isDark }: { isDark: boolean }) {
 function SecondaryButton({ icon, title, subtitle, onPress }: ButtonProps) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const { width: winWidth } = useWindowDimensions();
+  const localScale = Math.max(0.85, Math.min(1.25, winWidth / 375));
 
   return (
     <Pressable
@@ -393,13 +480,13 @@ function SecondaryButton({ icon, title, subtitle, onPress }: ButtonProps) {
       accessibilityLabel={title}
       style={({ pressed }) => [{ opacity: pressed ? 0.92 : 1, transform: [{ scale: pressed ? 0.996 : 1 }] }]}
     >
-      <LinearGradient colors={['#FDE68A', '#F9C74F']} start={[0, 0]} end={[1, 1]} style={[styles.buttonBase, styles.secondaryGradient]}>
-        <View style={[styles.iconWrapper, { backgroundColor: '#fff' }]}> 
-          <Ionicons name={icon} size={22} color="#F59E0B" />
+      <LinearGradient colors={['#FDE68A', '#F9C74F']} start={[0, 0]} end={[1, 1]} style={[styles.buttonBase, styles.secondaryGradient, { paddingVertical: Math.round(12 * localScale), paddingHorizontal: Math.round(14 * localScale), borderRadius: Math.round(28 * localScale) }]}>
+        <View style={[styles.iconWrapper, { backgroundColor: '#fff', width: Math.round(48 * localScale), height: Math.round(48 * localScale), borderRadius: Math.round(14 * localScale) }]}> 
+          <Ionicons name={icon} size={Math.round(18 * localScale)} color="#F59E0B" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.btnTitle, { color: '#111827' }]}>{title}</Text>
-          <Text style={[styles.btnSubtitle, { color: '#374151' }]}>{subtitle}</Text>
+          <Text style={[styles.btnTitle, { color: '#111827', fontSize: Math.round(16 * localScale) }]}>{title}</Text>
+          <Text style={[styles.btnSubtitle, { color: '#374151', fontSize: Math.round(12 * localScale) }]}>{subtitle}</Text>
         </View>
       </LinearGradient>
     </Pressable>
@@ -409,6 +496,9 @@ function SecondaryButton({ icon, title, subtitle, onPress }: ButtonProps) {
 function GhostButton({ icon, title, subtitle, onPress }: ButtonProps) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const isNativeDark = isDark && Platform.OS !== 'web';
+  const { width: winWidth } = useWindowDimensions();
+  const localScale = Math.max(0.85, Math.min(1.25, winWidth / 375));
 
   return (
     <Pressable
@@ -417,18 +507,18 @@ function GhostButton({ icon, title, subtitle, onPress }: ButtonProps) {
       accessibilityLabel={title}
       style={({ pressed }) => [
         styles.buttonBase,
-        isDark
-          ? { backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }
-          : styles.secondaryBtn,
+        isNativeDark
+          ? { backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', paddingVertical: Math.round(12 * localScale), borderRadius: Math.round(28 * localScale) }
+          : { ...styles.secondaryBtn, paddingVertical: Math.round(12 * localScale), borderRadius: Math.round(28 * localScale) },
         { opacity: pressed ? 0.96 : 1, transform: [{ scale: pressed ? 0.998 : 1 }] },
       ]}
     >
-      <View style={[styles.iconWrapper, { backgroundColor: isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.06)' }]}> 
-        <Ionicons name={icon} size={22} color={isDark ? '#c7b4ff' : '#6366f1'} />
+      <View style={[styles.iconWrapper, { backgroundColor: isNativeDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.06)', width: Math.round(48 * localScale), height: Math.round(48 * localScale), borderRadius: Math.round(14 * localScale) }]}> 
+        <Ionicons name={icon} size={Math.round(18 * localScale)} color={isNativeDark ? '#c7b4ff' : '#6366f1'} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.btnTitle, isDark ? { color: '#fff' } : { color: '#111827' }]}>{title}</Text>
-        <Text style={[styles.btnSubtitle, isDark ? { color: 'rgba(255,255,255,0.85)' } : { color: '#374151' }]}>{subtitle}</Text>
+        <Text style={[styles.btnTitle, isNativeDark ? { color: '#fff' } : { color: '#111827', fontSize: Math.round(16 * localScale) }]}>{title}</Text>
+        <Text style={[styles.btnSubtitle, isNativeDark ? { color: 'rgba(255,255,255,0.85)' } : { color: '#374151', fontSize: Math.round(12 * localScale) }]}>{subtitle}</Text>
       </View>
     </Pressable>
   );

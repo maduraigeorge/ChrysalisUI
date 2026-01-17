@@ -31,6 +31,7 @@ type ButtonProps = {
 export default function WelcomeScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const isNativeDark = isDark && Platform.OS !== 'web';
 
   // responsive padding helper (fix for 'containerPadding' undefined)
   const { width: winWidth, height: winHeight } = useWindowDimensions();
@@ -51,22 +52,22 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={[styles.container, (isDark && Platform.OS !== 'web') && styles.containerDark, { paddingHorizontal: containerPadding, paddingVertical: Math.round(Platform.OS === 'ios' ? Math.max(20, winHeight * 0.03) : 16) }]}>
       {/* Child-friendly background decorations */}
-      <BackgroundShapes isDark={isDark} />
+      <BackgroundShapes isDark={isNativeDark} />
 
       {/* Center content */}
       <View style={[styles.centerBlock, styles.content]}>
-        <View style={[styles.logoCard, isDark && styles.logoCardDark]}>
-          <BlurView intensity={40} tint={isDark ? 'dark' : 'light'} style={styles.logoBlur} />
+        <View style={[styles.logoCard, isNativeDark && styles.logoCardDark]}>
+          <BlurView intensity={40} tint={isNativeDark ? 'dark' : 'light'} style={styles.logoBlur} />
           <Animated.View style={{ transform: [{ scale }] }}>
             <Logo size={120} />
           </Animated.View>
         </View>
 
-        <Text style={[styles.title, { maxWidth: Math.min(540, width - 48) }, isDark && styles.textDark]}>
+        <Text style={[styles.title, { maxWidth: Math.min(540, width - 48) }, isNativeDark && styles.textDark]}>
           <Text style={styles.titleLight}>Welcome to </Text>
           <Text style={styles.primary}>Chrysalis</Text>
         </Text>
-        <Text style={[styles.subtitle, isDark && styles.textDark]}>Adaptive learning for every child.</Text>
+        <Text style={[styles.subtitle, isNativeDark && styles.textDark]}>Adaptive learning for every child.</Text>
         <View style={{ height: 28 }} />
       </View>
 
@@ -93,7 +94,7 @@ export default function WelcomeScreen() {
           onPress={() => console.log('Create Account')}
         />
 
-        <Text style={[styles.helpText, isDark && { color: 'rgba(255,255,255,0.75)' }]}>Need help choosing?</Text>
+        <Text style={[styles.helpText, isNativeDark && { color: 'rgba(255,255,255,0.75)' }]}>Need help choosing?</Text>
 
       </View> 
     </SafeAreaView>
@@ -406,6 +407,7 @@ function SecondaryButton({ icon, title, subtitle, onPress }: ButtonProps) {
 function GhostButton({ icon, title, subtitle, onPress }: ButtonProps) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const isNativeDark = isDark && Platform.OS !== 'web';
 
   return (
     <Pressable
@@ -414,18 +416,18 @@ function GhostButton({ icon, title, subtitle, onPress }: ButtonProps) {
       accessibilityLabel={title}
       style={({ pressed }) => [
         styles.buttonBase,
-        isDark
+        isNativeDark
           ? { backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }
           : styles.secondaryBtn,
         { opacity: pressed ? 0.96 : 1, transform: [{ scale: pressed ? 0.998 : 1 }] },
       ]}
     >
-      <View style={[styles.iconWrapper, { backgroundColor: isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.06)' }]}> 
-        <Ionicons name={icon} size={22} color={isDark ? '#c7b4ff' : '#6366f1'} />
+      <View style={[styles.iconWrapper, { backgroundColor: isNativeDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.06)' }]}> 
+        <Ionicons name={icon} size={22} color={isNativeDark ? '#c7b4ff' : '#6366f1'} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.btnTitle, isDark ? { color: '#fff' } : { color: '#111827' }]}>{title}</Text>
-        <Text style={[styles.btnSubtitle, isDark ? { color: 'rgba(255,255,255,0.85)' } : { color: '#374151' }]}>{subtitle}</Text>
+        <Text style={[styles.btnTitle, isNativeDark ? { color: '#fff' } : { color: '#111827' }]}>{title}</Text>
+        <Text style={[styles.btnSubtitle, isNativeDark ? { color: 'rgba(255,255,255,0.85)' } : { color: '#374151' }]}>{subtitle}</Text>
       </View>
     </Pressable>
   );
