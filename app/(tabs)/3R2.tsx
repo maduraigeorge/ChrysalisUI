@@ -2,17 +2,17 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  useWindowDimensions,
-  View,
+    Animated,
+    Dimensions,
+    Easing,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    useWindowDimensions,
+    View,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -47,7 +47,7 @@ function formatDateShort(date: Date) {
 
 export default function WelcomeScreen() {
   const scale = useRef(new Animated.Value(1)).current;
-  const rot = useRef(new Animated.Value(0)).current;
+  const rot = useRef(new Animated.Value(0)).current; 
 
   useEffect(() => {
     const anim = Animated.loop(
@@ -78,11 +78,11 @@ export default function WelcomeScreen() {
   const isDark = scheme === 'dark';
 
   const subjects = [
-    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24' }, { title: 'ACTIVITY 1.17' }] },
-    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3' }] },
-    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1' }] },
-    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1' }, { title: 'Plants and Growth 2.4' }] },
-    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5' }] },
+    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24', dueDate: '10/02/2026' }, { title: 'ACTIVITY 1.17', dueDate: '15/02/2026' }] },
+    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3', dueDate: '12/02/2026' }] },
+    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1', dueDate: '18/02/2026' }] },
+    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1', dueDate: '09/02/2026' }, { title: 'Plants and Growth 2.4', dueDate: '20/02/2026' }] },
+    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5', dueDate: '14/02/2026' }] },
   ];
 
   const subjectColors: Record<string, any> = {
@@ -216,24 +216,25 @@ export default function WelcomeScreen() {
 
                 return (
                   <View key={sub.key} style={[styles.subjectCard]}>
-                    <TouchableOpacity onPress={() => toggleSubject(sub.key)}>
-                      <View style={[styles.subjectHeaderGradient, { backgroundColor: col.headerBg || col.bg }]}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                          <View style={[styles.subjectIcon, { backgroundColor: '#fff' }]}>
-                            <MaterialIcons name={col.icon} size={18} color={col.accent} />
+                    <View style={[styles.subjectContainer, { borderColor: col.accent }]}> 
+                      <TouchableOpacity onPress={() => toggleSubject(sub.key)}>
+                        <View style={[styles.subjectHeaderGradient, { backgroundColor: col.headerBg || col.bg }]}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                            <View style={[styles.subjectIcon, { backgroundColor: '#fff' }]}>
+                              <MaterialIcons name={col.icon} size={18} color={col.accent} />
+                            </View>
+                            <Text style={styles.subjectTitle} numberOfLines={2}>{sub.key}</Text>
                           </View>
-                          <Text style={styles.subjectTitle} numberOfLines={2}>{sub.key}</Text>
-                        </View>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          <Text style={[styles.counterPlain, { marginRight: 8 }]}>{sub.count}</Text>
-                          <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={18} color="#0f172a" />
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={[styles.counterPlain, { marginRight: 8 }]}>{sub.count}</Text>
+                            <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={16} color="#0f172a" />
+                          </View>
                         </View>
-                      </View>
-                    </TouchableOpacity>
+                      </TouchableOpacity>
 
-                    {isOpen && (
-                      <View style={[styles.activitiesList, { backgroundColor: 'transparent', padding: 4, borderRadius: 0, marginTop: 4 }]}>
+                      {isOpen && (
+                        <View style={[styles.activitiesList, { backgroundColor: '#fff', paddingVertical: 4, paddingHorizontal: 0 }]}>
                         {sub.activities.map((a, i) => {
                             const parsed = parseDateInput(a.dueDate);
                             const today = new Date();
@@ -249,25 +250,26 @@ export default function WelcomeScreen() {
                             }
 
                             return (
-                              <View key={i} style={[styles.activityItem, i < sub.activities.length - 1 && styles.activityDivider, { borderWidth: 1, borderColor: col.accent, borderRadius: 8, backgroundColor: '#fff', paddingVertical: 10, paddingHorizontal: 10 }]}>
+                              <View key={i} style={[styles.activityItem, i < sub.activities.length - 1 && styles.activityDivider, { backgroundColor: 'transparent', paddingVertical: 10, paddingHorizontal: 12 }]}>
                                 <View style={{ flex: 1 }}>
                                   <Text style={styles.activityTitle}>{a.title}</Text>
                                   <Text style={[styles.dueText, { color: dueColor }]}>{dueLabel}</Text>
                                 </View>
 
                                 <View style={{ alignItems: 'center' }}>
-                                  <Ionicons name="camera" size={20} color="#000" />
+                                  <Ionicons name="camera" size={18} color="#000" />
                                 </View>
                               </View>
                             );
                           })} 
-                      </View>
-                    )}  
+                        </View>
+                      )}
+                    </View>
                   </View>
                 );
               })}
 
-              <View style={{ height: 32 }} />
+              <View style={{ height: 12 }} />
 
               <View style={[styles.sectionRow, { paddingVertical: Math.round(6 * fontScale) }]}>
                 <Text style={[styles.sectionTitle, { fontSize: Math.round(18 * fontScale) }]}>Completed Activities</Text>
@@ -588,7 +590,7 @@ const styles = StyleSheet.create<any>({
   subjectCard: {
     backgroundColor: 'transparent',
     borderRadius: 0,
-    marginBottom: 12,
+    marginBottom: 6,
     padding: 0,
     elevation: 0,
     shadowColor: 'transparent',
@@ -597,17 +599,17 @@ const styles = StyleSheet.create<any>({
     shadowRadius: 0,
   },
   subjectTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     color: '#0f172a',
-    marginLeft: 8,
+    marginLeft: 6,
     flex: 1,
     flexWrap: 'wrap',
   },
   subjectIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -645,21 +647,23 @@ const styles = StyleSheet.create<any>({
   },
   activitiesList: {
     marginTop: 0,
+    overflow: 'hidden',
+    borderRadius: 0,
+    backgroundColor: '#fff',
   },
   activityItem: {
     backgroundColor: 'transparent',
     borderRadius: 0,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    marginVertical: 0,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   activityDivider: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(15,23,42,0.04)',
-    paddingBottom: 6,
-    marginBottom: 6,
+    borderBottomColor: 'rgba(15,23,42,0.06)',
   },
   activitiesCardInner: {
     backgroundColor: 'transparent',
@@ -715,11 +719,23 @@ const styles = StyleSheet.create<any>({
     marginBottom: 6,
   },
   subjectHeaderGradient: {
-    padding: 8,
-    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+
+  subjectContainer: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(15,23,42,0.06)',
+    overflow: 'hidden',
+    marginBottom: 6,
   },
 
   bodyWrap: {
@@ -816,7 +832,7 @@ const styles = StyleSheet.create<any>({
   subjectCardSmall: {
     backgroundColor: 'transparent',
     borderRadius: 0,
-    marginBottom: 8,
+    marginBottom: 6,
     padding: 0,
     elevation: 0,
     shadowColor: 'transparent',
@@ -827,7 +843,7 @@ const styles = StyleSheet.create<any>({
   completedItem: {
     borderRadius: 10,
     padding: 10,
-    marginBottom: 8,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: 'rgba(15,23,42,0.04)',
   },

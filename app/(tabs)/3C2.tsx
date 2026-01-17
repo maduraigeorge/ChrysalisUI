@@ -2,16 +2,16 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
-  Dimensions,
-  LayoutAnimation,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  UIManager,
-  View,
-  useWindowDimensions,
+    Dimensions,
+    LayoutAnimation,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    UIManager,
+    View,
+    useWindowDimensions,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -84,11 +84,11 @@ export default function ParentDashboardScreen() {
   }, []);
 
   const subjects = [
-    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24' }, { title: 'ACTIVITY 1.17' }] },
-    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3' }] },
-    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1' }] },
-    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1' }, { title: 'Plants and Growth 2.4' }] },
-    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5' }] },
+    { key: 'Mathematics', count: 2, activities: [{ title: 'THINK AND INK 1.24', dueDate: '10/02/2026' }, { title: 'ACTIVITY 1.17', dueDate: '15/02/2026' }] },
+    { key: 'Environmental Studies', count: 1, activities: [{ title: 'Activity 2.3', dueDate: '12/02/2026' }] },
+    { key: 'Social', count: 1, activities: [{ title: 'Look Beyond 2.1', dueDate: '18/02/2026' }] },
+    { key: 'Science', count: 2, activities: [{ title: 'Explore Matter 1.1', dueDate: '09/02/2026' }, { title: 'Plants and Growth 2.4', dueDate: '20/02/2026' }] },
+    { key: 'English', count: 1, activities: [{ title: 'Storytelling 1.5', dueDate: '14/02/2026' }] },
   ];
 
   const completed = [
@@ -131,7 +131,8 @@ export default function ParentDashboardScreen() {
 
   // Responsive helpers — compute runtime sizes so layout adapts across screen widths
   const { width: winWidth } = useWindowDimensions();
-  const containerPadding = Math.max(14, Math.round(winWidth * 0.04)); // 4% min 14
+  // increased horizontal padding for more comfortable left/right margins
+  const containerPadding = Math.max(20, Math.round(winWidth * 0.06)); // 6% min 20
   const maxCardWidth = Math.min(920, Math.max(360, winWidth - 32));
   // fontScale: keeps type readable on small and large screens
   const fontScale = Math.max(0.9, Math.min(1.25, winWidth / 375));
@@ -191,11 +192,12 @@ export default function ParentDashboardScreen() {
                     <ActivityRow
                       key={i}
                       title={a.title}
+                      dueDate={a.dueDate}
                       bg={'#fff'}
                       accent={subjectColors[s.key]?.accent ?? (colorMap[s.key] || '#5D5FEF')}
                       fontScale={fontScale}
                     />
-                  ))}
+                  ))} 
                 </SubjectCard>
               ))} 
 
@@ -305,11 +307,11 @@ function SubjectCard({ color, icon, title, meta, badge, children, expanded, onTo
           accessibilityLabel={`${title} section`}
         >
           <View style={[styles.subjectHeaderRow, { alignItems: 'center' }]}>
-            <View style={[styles.subjectIconBox, { backgroundColor: iconBoxBg, padding: Math.round(6 * fontScale), borderRadius: Math.round(10 * fontScale) }]}>
-              <MaterialIcons name={icon} size={Math.round(18 * fontScale)} color={accent} />
+            <View style={[styles.subjectIconBox, { backgroundColor: iconBoxBg, padding: Math.round(8 * fontScale), borderRadius: Math.round(12 * fontScale) }]}>
+              <MaterialIcons name={icon} size={Math.round(20 * fontScale)} color={accent} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.subjectTitle, { fontSize: Math.round(15 * fontScale) }]}>{title}</Text>
+              <Text style={[styles.subjectTitle, { fontSize: Math.round(16 * fontScale) }]}>{title}</Text>
               {meta ? <Text style={[styles.subjectMeta, { fontSize: Math.round(12 * fontScale), marginTop: 2 }]}>{meta}</Text> : null}
             </View>
             {badge && (
@@ -327,7 +329,7 @@ function SubjectCard({ color, icon, title, meta, badge, children, expanded, onTo
         </TouchableOpacity>
 
         {isExpanded && (
-          <View style={[styles.accordion, { backgroundColor: iconBoxBg, padding: Math.round(6 * fontScale), borderRadius: Math.round(10 * fontScale) }]}>
+          <View style={[styles.accordion, { backgroundColor: iconBoxBg, padding: Math.round(6 * fontScale), borderRadius: Math.round(10 * fontScale) }]}> 
             <View style={[styles.accordionInner, { paddingVertical: Math.round(2 * fontScale) }]}>
               {children}
             </View>
@@ -339,18 +341,93 @@ function SubjectCard({ color, icon, title, meta, badge, children, expanded, onTo
 }
 
 
-function ActivityRow({ title, bg, accent, fontScale = 1 }: any) {
+// Helper: robust date parsing for dd/mm/yyyy, ISO strings, or Date objects
+function parseDateInput(input: any): Date | null {
+  if (!input) return null;
+  if (input instanceof Date) return new Date(input.getFullYear(), input.getMonth(), input.getDate());
+  if (typeof input === 'number') return new Date(input);
+  if (typeof input === 'string') {
+    // try ISO first
+    const iso = Date.parse(input);
+    if (!isNaN(iso)) return new Date(iso);
+    // try DD/MM/YYYY or D/M/YYYY
+    const m = input.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m) {
+      const d = parseInt(m[1], 10);
+      const mo = parseInt(m[2], 10) - 1;
+      const y = parseInt(m[3], 10);
+      return new Date(y, mo, d);
+    }
+  }
+  return null;
+}
+
+function daysBetween(a: Date, b: Date) {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const a0 = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const b0 = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.round((b0.getTime() - a0.getTime()) / msPerDay);
+}
+
+function formatDateShort(date: Date) {
+  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+function ActivityRow({ title, dueDate, bg, accent, fontScale = 1 }: any) {
   const background = bg ?? '#fff';
   const border = accent || '#5D5FEF';
+
+  const parsed = parseDateInput(dueDate);
+  const today = new Date();
+  let dueLabel = 'Due: TBD';
+  let dueColor = '#94A3B8';
+
+  if (parsed) {
+    const diff = daysBetween(today, parsed);
+    if (diff < 0) {
+      dueLabel = `Overdue: ${formatDateShort(parsed)}`;
+      dueColor = '#ef4444'; // red
+    } else if (diff === 0) {
+      dueLabel = 'Due Today';
+      dueColor = '#f97316'; // orange
+    } else if (diff === 1) {
+      dueLabel = 'Due Tomorrow';
+      dueColor = '#f59e0b'; // amber
+    } else if (diff <= 7) {
+      dueLabel = `Due in ${diff} days`;
+      dueColor = '#94A3B8';
+    } else {
+      dueLabel = `Due: ${formatDateShort(parsed)}`;
+      dueColor = '#94A3B8';
+    }
+  }
+
   return (
-    <View style={[styles.activityRow, { backgroundColor: background, borderWidth: 1, borderColor: border, borderRadius: Math.round(14 * fontScale), paddingHorizontal: Math.round(12 * fontScale), paddingVertical: Math.round(8 * fontScale) }]}> 
-      <Text style={[styles.activityTitle, { color: '#0f172a', fontSize: Math.round(13 * fontScale), fontWeight: '600' }]} numberOfLines={2}>{title}</Text>
+    <View
+      style={[
+        styles.activityRow,
+        {
+          backgroundColor: background,
+          borderWidth: 1,
+          borderColor: border,
+          borderRadius: Math.round(14 * fontScale),
+          paddingHorizontal: Math.round(12 * fontScale),
+          paddingVertical: Math.round(8 * fontScale),
+        },
+      ]}>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.activityTitle, { color: '#0f172a', fontSize: Math.round(13 * fontScale), fontWeight: '600' }]} numberOfLines={2}>
+          {title}
+        </Text>
+        <Text style={[styles.dueText, { color: dueColor, fontSize: Math.round(12 * fontScale) }]}>{dueLabel}</Text>
+      </View>
+
       <View style={styles.activityRight}>
         <MaterialIcons name="photo-camera" size={Math.round(16 * fontScale)} color="#0f172a" />
       </View>
     </View>
   );
-} 
+}
 
 /* ───────── STYLES ───────── */
 
@@ -644,6 +721,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#94A3B8',
     marginTop: 2,
+  },
+
+  dueText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 6,
   },
 
   insightsText: {
